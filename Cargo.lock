@@ -233,6 +233,7 @@ name = "dinstaller-cli"
 version = "0.1.0"
 dependencies = [
  "clap",
+ "dinstaller-lib",
 ]
 
 [[package]]
