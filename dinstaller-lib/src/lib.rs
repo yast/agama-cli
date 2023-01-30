@@ -9,6 +9,8 @@ pub fn products() -> Result<Vec<(String,String)>, zbus::Error> {
     proxy.get_property("AvailableBaseProducts")
 }
 
+mod dinstaller;
+
 #[cfg(test)]
 mod tests {
     use super::*;
