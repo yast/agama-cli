@@ -1,10 +1,16 @@
+use std::path::Path;
 use std::collections::HashMap;
 use zbus::zvariant::Value;
 use zbus::dbus_proxy;
 
 pub fn connection() -> Result<zbus::blocking::Connection, zbus::Error>{
-    // TODO: detection of dinstaller specific bus and use it if found
-    zbus::blocking::ConnectionBuilder::address("unix:path=/run/dbus/system_bus_socket")?.build()
+    let path = if Path::new("/run/d-installer/bus").exists() {
+        "/run/d-installer/bus"
+    } else {
+        "/run/dbus/system_bus_socket"
+    };
+    let address = format!("unix:path={}", path);
+    zbus::blocking::ConnectionBuilder::address(address.as_str())?.build()
 }
 
 #[dbus_proxy(
