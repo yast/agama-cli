@@ -1,9 +1,13 @@
 mod cli;
 mod printers;
+mod commands;
 
 use clap::Parser;
 use std::error;
+use std::str::FromStr;
+
 use cli::{Commands, ConfigCommands};
+use commands::config::{ConfigAction, ConfigKey, ConfigAssignment};
 use printers::{print, Format};
 use dinstaller_lib::{software, storage, users};
 
@@ -39,21 +43,28 @@ fn info(keys: Vec<String>, format: Option<Format>) -> Result<(), Box<dyn error::
     }
 }
 
-fn show_config(keys: Vec<String>) {
-    unimplemented!("Show config for {:?}", &keys);
-}
-
-fn set_config(values: Vec<String>) {
-    unimplemented!("Set config values {:?}", &values);
+/// Extracts the config action from the command line
+fn build_config_action(subcommand: ConfigCommands) -> ConfigAction {
+    // fixme: instead of filtering, we should report errors
+    match subcommand {
+        ConfigCommands::Show { keys } => {
+            let keys = keys.iter().filter_map(|k| ConfigKey::from_str(&k).ok()).collect();
+            ConfigAction::Show(keys)
+        },
+        ConfigCommands::Set { values } => {
+            let values = values.iter().filter_map(|k| ConfigAssignment::from_str(&k).ok()).collect();
+            ConfigAction::Set(values)
+        }
+    }
 }
 
 fn main() {
     let cli = Cli::parse();
     match cli.command {
         Commands::Info { keys } => info(keys, cli.format).unwrap(),
-        Commands::Config(subcommand) => match subcommand {
-            ConfigCommands::Show { keys } => show_config(keys),
-            ConfigCommands::Set { values } => set_config(values),
-        },
+        Commands::Config(subcommand) => {
+            let action = build_config_action(subcommand);
+            dbg!(action);
+        }
     }
 }
