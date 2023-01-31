@@ -1,7 +1,10 @@
-use std::path::Path;
-
+pub mod software;
+pub mod storage;
+pub mod users;
 // TODO: maybe expose only clients when we have it?
 pub mod proxies;
+
+use std::path::Path;
 
 pub fn connection() -> Result<zbus::blocking::Connection, zbus::Error>{
     let path = if Path::new("/run/d-installer/bus").exists() {
