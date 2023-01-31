@@ -1,14 +1,14 @@
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
-}
+use std::path::Path;
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+// TODO: maybe expose only clients when we have it?
+pub mod proxies;
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
+pub fn connection() -> Result<zbus::blocking::Connection, zbus::Error>{
+    let path = if Path::new("/run/d-installer/bus").exists() {
+        "/run/d-installer/bus"
+    } else {
+        "/run/dbus/system_bus_socket"
+    };
+    let address = format!("unix:path={}", path);
+    zbus::blocking::ConnectionBuilder::address(address.as_str())?.build()
 }
