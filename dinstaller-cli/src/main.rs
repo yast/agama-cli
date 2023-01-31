@@ -1,10 +1,11 @@
 mod cli;
+mod printers;
 
 use clap::Parser;
 use std::error;
 use cli::{Commands, ConfigCommands};
+use printers::{print, Format};
 use dinstaller_lib::{software, storage, users};
-use dinstaller_cli::printers::{print, Format};
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
