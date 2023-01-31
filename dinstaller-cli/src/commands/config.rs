@@ -21,15 +21,15 @@ impl FromStr for ConfigKey {
 pub struct ConfigValue(String);
 
 #[derive(Debug)]
-pub struct ConfigAssignment(ConfigKey, ConfigValue);
+pub struct ConfigChange(ConfigKey, ConfigValue);
 
-impl FromStr for ConfigAssignment {
+impl FromStr for ConfigChange {
     type Err = String; // fixme: use a real error
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         if let Some((key, value)) = s.split_once("=") {
           if let Ok(key) = ConfigKey::from_str(key) {
-                return Ok(ConfigAssignment(key, ConfigValue(value.to_string())))
+                return Ok(ConfigChange(key, ConfigValue(value.to_string())))
             }
         }
 
@@ -40,7 +40,7 @@ impl FromStr for ConfigAssignment {
 #[derive(Debug)]
 pub enum ConfigAction {
     Add(ConfigKey, ConfigValue),
-    Set(Vec<ConfigAssignment>),
+    Set(Vec<ConfigChange>),
     Reset(Vec<ConfigKey>),
     Show(Vec<ConfigKey>)
 }
@@ -60,7 +60,7 @@ mod test {
 
     #[test]
     fn test_config_assignment_from_str() {
-        let ConfigAssignment(key, value) = ConfigAssignment::from_str("storage.lvm=true").unwrap();
+        let ConfigChange(key, value) = ConfigChange::from_str("storage.lvm=true").unwrap();
         let ConfigKey(namespace, name) = key;
         assert_eq!(namespace, "storage".to_string());
         assert_eq!(name, "lvm".to_string());

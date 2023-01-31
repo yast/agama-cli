@@ -7,7 +7,7 @@ use std::error;
 use std::str::FromStr;
 
 use cli::{Commands, ConfigCommands};
-use commands::config::{ConfigAction, ConfigKey, ConfigAssignment};
+use commands::config::{ConfigAction, ConfigKey, ConfigChange};
 use printers::{print, Format};
 use dinstaller_lib::{software, storage, users};
 
@@ -52,7 +52,7 @@ fn build_config_action(subcommand: ConfigCommands) -> ConfigAction {
             ConfigAction::Show(keys)
         },
         ConfigCommands::Set { values } => {
-            let values = values.iter().filter_map(|k| ConfigAssignment::from_str(&k).ok()).collect();
+            let values = values.iter().filter_map(|k| ConfigChange::from_str(&k).ok()).collect();
             ConfigAction::Set(values)
         }
     }
