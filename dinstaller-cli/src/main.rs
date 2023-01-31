@@ -2,7 +2,7 @@ use clap::Parser;
 use std::error;
 
 use dinstaller_cli::commands::{Commands, ConfigCommands};
-use dinstaller_lib::{software, users};
+use dinstaller_lib::{software, storage, users};
 use dinstaller_cli::printers::{print, Format};
 
 #[derive(Parser)]
@@ -27,7 +27,13 @@ fn info(keys: Vec<String>, format: Option<Format>) -> Result<(), Box<dyn error::
     let stdout = std::io::stdout();
     match key.as_str() {
         "users" => print(users::users(), stdout, format),
-        _ => print(software::products(), stdout, format),
+        "storage.candidate_devices" => print(storage::candidate_devices()?, stdout, format),
+        "storage.available_devices" => print(storage::available_devices()?, stdout, format),
+        "products" => print(software::products(), stdout, format),
+        _ => {
+            println!("unknown key");
+            Ok(())
+        }
     }
 }
 

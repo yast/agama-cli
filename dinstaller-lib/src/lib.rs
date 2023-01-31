@@ -1,4 +1,5 @@
 pub mod software;
+pub mod storage;
 pub mod users;
 // TODO: maybe expose only clients when we have it?
 pub mod proxies;
