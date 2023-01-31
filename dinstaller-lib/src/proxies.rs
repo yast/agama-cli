@@ -244,7 +244,9 @@ trait Validation1 {
 #[dbus_proxy(
     interface = "org.opensuse.DInstaller.Storage1",
     default_service = "org.opensuse.DInstaller.Storage",
-    default_path = "/org/opensuse/DInstaller/Storage1"
+    default_path = "/org/opensuse/DInstaller/Storage1",
+    gen_async = false,
+    gen_blocking = true
 )]
 trait Storage1 {
     /// Finish method
@@ -258,22 +260,19 @@ trait Storage1 {
 }
 
 #[dbus_proxy(
-    interface = "org.opensuse.DInstaller.Storage.Proposal1",
     default_service = "org.opensuse.DInstaller.Storage",
-    default_path = "/org/opensuse/DInstaller/Storage/Proposal1"
+    default_path = "/org/opensuse/DInstaller/Storage1",
+    interface = "org.opensuse.DInstaller.Storage1.Proposal.Calculator",
+    assume_defaults = true,
+    gen_async = false,
+    gen_blocking = true
 )]
-trait StorageProposal1 {
+trait Calculator {
     /// Calculate method
     fn calculate(
         &self,
         settings: std::collections::HashMap<&str, zbus::zvariant::Value<'_>>,
     ) -> zbus::Result<u32>;
-
-    /// Actions property
-    #[dbus_proxy(property)]
-    fn actions(
-        &self,
-    ) -> zbus::Result<Vec<std::collections::HashMap<String, zbus::zvariant::OwnedValue>>>;
 
     /// AvailableDevices property
     #[dbus_proxy(property)]
@@ -287,6 +286,31 @@ trait StorageProposal1 {
         )>,
     >;
 
+    /// Result property
+    #[dbus_proxy(property)]
+    fn result(&self) -> zbus::Result<zbus::zvariant::OwnedObjectPath>;
+
+    /// VolumeTemplates property
+    #[dbus_proxy(property)]
+    fn volume_templates(
+        &self,
+    ) -> zbus::Result<Vec<std::collections::HashMap<String, zbus::zvariant::OwnedValue>>>;
+}
+
+#[dbus_proxy(
+    interface = "org.opensuse.DInstaller.Storage1.Proposal",
+    default_service = "org.opensuse.DInstaller.Storage",
+    default_path = "/org/opensuse/DInstaller/Storage1/Proposal",
+    gen_async = false,
+    gen_blocking = true
+)]
+trait StorageProposal {
+    /// Actions property
+    #[dbus_proxy(property)]
+    fn actions(
+        &self,
+    ) -> zbus::Result<Vec<std::collections::HashMap<String, zbus::zvariant::OwnedValue>>>;
+
     /// CandidateDevices property
     #[dbus_proxy(property)]
     fn candidate_devices(&self) -> zbus::Result<Vec<String>>;
@@ -298,12 +322,6 @@ trait StorageProposal1 {
     /// LVM property
     #[dbus_proxy(property, name = "LVM")]
     fn lvm(&self) -> zbus::Result<bool>;
-
-    /// VolumeTemplates property
-    #[dbus_proxy(property)]
-    fn volume_templates(
-        &self,
-    ) -> zbus::Result<Vec<std::collections::HashMap<String, zbus::zvariant::OwnedValue>>>;
 
     /// Volumes property
     #[dbus_proxy(property)]
