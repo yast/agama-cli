@@ -13,11 +13,8 @@
 //! …consequently `zbus-xmlgen` did not generate code for the above interfaces.
 //! Also some proxies can be used against multiple services when they share interface.
 
+use zbus::dbus_proxy;
 
-
-pub mod proxies {
-
-    use zbus::dbus_proxy;
 /// Progress1Proxy can be used also with Software and Storage object.
 /// 
 /// TODO: example
@@ -365,5 +362,4 @@ trait Users1 {
     /// RootSSHKey property
     #[dbus_proxy(property, name = "RootSSHKey")]
     fn root_sshkey(&self) -> zbus::Result<String>;
-}
 }
