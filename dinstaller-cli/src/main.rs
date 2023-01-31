@@ -1,13 +1,14 @@
 mod cli;
 mod printers;
-mod commands;
+mod actions;
 
 use clap::Parser;
 use std::error;
+use std::collections::HashMap;
 use std::str::FromStr;
 
 use cli::{Commands, ConfigCommands};
-use commands::config::{ConfigAction, ConfigKey, ConfigChange};
+use actions::{ConfigAction, ConfigKey, StorageActionsRunner};
 use printers::{print, Format};
 use dinstaller_lib::{software, storage, users};
 
@@ -35,6 +36,7 @@ fn info(keys: Vec<String>, format: Option<Format>) -> Result<(), Box<dyn error::
         "users" => print(users::users(), stdout, format),
         "storage.candidate_devices" => print(storage::candidate_devices()?, stdout, format),
         "storage.available_devices" => print(storage::available_devices()?, stdout, format),
+        "storage.proposal" => print(storage::proposal()?, stdout, format),
         "products" => print(software::products(), stdout, format),
         _ => {
             println!("unknown key");
@@ -52,8 +54,12 @@ fn build_config_action(subcommand: ConfigCommands) -> ConfigAction {
             ConfigAction::Show(keys)
         },
         ConfigCommands::Set { values } => {
-            let values = values.iter().filter_map(|k| ConfigChange::from_str(&k).ok()).collect();
-            ConfigAction::Set(values)
+            let changes: HashMap<ConfigKey, String> = values.iter().map(|s| {
+                let (key, value) = s.split_once("=").unwrap();
+                let key = ConfigKey::from_str(key).unwrap();
+                (key, value.to_string())
+            }).collect();
+            ConfigAction::Set(changes)
         }
     }
 }
@@ -63,8 +69,10 @@ fn main() {
     match cli.command {
         Commands::Info { keys } => info(keys, cli.format).unwrap(),
         Commands::Config(subcommand) => {
+            // fixme: move to a better place
             let action = build_config_action(subcommand);
-            dbg!(action);
+            let runner = StorageActionsRunner::new().unwrap();
+            runner.run(action).unwrap();
         }
     }
 }
