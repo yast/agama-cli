@@ -1,7 +1,8 @@
+mod cli;
+
 use clap::Parser;
 use std::error;
-
-use dinstaller_cli::commands::{Commands, ConfigCommands};
+use cli::{Commands, ConfigCommands};
 use dinstaller_lib::{software, storage, users};
 use dinstaller_cli::printers::{print, Format};
 
