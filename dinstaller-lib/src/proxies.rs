@@ -333,7 +333,9 @@ trait StorageProposal {
 #[dbus_proxy(
     interface = "org.opensuse.DInstaller.Users1",
     default_service = "org.opensuse.DInstaller.Users",
-    default_path = "/org/opensuse/DInstaller/Users1"
+    default_path = "/org/opensuse/DInstaller/Users1",
+    gen_async = false,
+    gen_blocking = true
 )]
 trait Users1 {
     /// RemoveFirstUser method
