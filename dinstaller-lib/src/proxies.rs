@@ -229,7 +229,9 @@ trait SoftwareProposal1 {
 #[dbus_proxy(
     interface = "org.opensuse.DInstaller.Validation1",
     default_service = "org.opensuse.DInstaller.Storage",
-    default_path = "/org/opensuse/DInstaller/Storage1"
+    default_path = "/org/opensuse/DInstaller/Storage1",
+    gen_async = false,
+    gen_blocking = true
 )]
 trait Validation1 {
     /// Errors property
