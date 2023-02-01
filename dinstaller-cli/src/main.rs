@@ -1,9 +1,14 @@
 use clap::Parser;
 use std::error;
 
-use dinstaller_cli::commands::{Commands, ConfigCommands};
+mod commands;
+mod config;
+mod printers;
+
+use commands::Commands;
+use config::run as run_config_cmd;
 use dinstaller_lib::{software, storage, users};
-use dinstaller_cli::printers::{print, Format};
+use printers::{print, Format};
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
