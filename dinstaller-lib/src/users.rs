@@ -10,6 +10,7 @@ pub struct UsersClient<'a> {
 pub struct FirstUser {
     pub full_name: String,
     pub user_name: String,
+    pub password: String,
     pub autologin: bool,
     pub data: std::collections::HashMap<String, zbus::zvariant::OwnedValue>
 }
@@ -27,7 +28,8 @@ impl FirstUser {
                 full_name: data.0,
                 user_name: data.1,
                 autologin: data.2,
-                data: data.3
+                data: data.3,
+                password: "".to_string()
             }
         )
     }
@@ -51,6 +53,16 @@ impl<'a> UsersClient<'a> {
 
     pub fn root_ssh_key(&self) -> zbus::Result<String> {
         self.users_proxy.root_sshkey()
+    }
+
+    pub fn set_first_user(&self, first_user: &FirstUser) -> zbus::Result<(bool, Vec<String>)> {
+        self.users_proxy.set_first_user(
+            &first_user.full_name,
+            &first_user.user_name,
+            &first_user.password,
+            first_user.autologin,
+            std::collections::HashMap::new()
+        )
     }
 }
 
