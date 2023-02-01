@@ -26,7 +26,7 @@ fn info(keys: Vec<String>, format: Option<Format>) -> Result<(), Box<dyn error::
 
     let stdout = std::io::stdout();
     match key.as_str() {
-        "users" => print(users::users(), stdout, format),
+        "users" => print(users::first_user()?, stdout, format),
         "storage.candidate_devices" => print(storage::candidate_devices()?, stdout, format),
         "storage.available_devices" => print(storage::available_devices()?, stdout, format),
         "products" => print(software::products(), stdout, format),
