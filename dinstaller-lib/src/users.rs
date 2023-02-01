@@ -65,18 +65,3 @@ impl<'a> UsersClient<'a> {
         )
     }
 }
-
-pub fn first_user() -> zbus::Result<FirstUser> {
-    let client = UsersClient::new(super::connection()?)?;
-    client.first_user()
-}
-
-pub fn is_root_password() -> zbus::Result<bool> {
-    let client = UsersClient::new(super::connection()?)?;
-    client.is_root_password()
-}
-
-pub fn root_ssh_key() -> zbus::Result<String> {
-    let client = UsersClient::new(super::connection()?)?;
-    client.root_ssh_key()
-}
