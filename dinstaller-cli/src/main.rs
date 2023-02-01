@@ -42,21 +42,10 @@ fn info(keys: Vec<String>, format: Option<Format>) -> Result<(), Box<dyn error::
     }
 }
 
-fn show_config(keys: Vec<String>) {
-    unimplemented!("Show config for {:?}", &keys);
-}
-
-fn set_config(values: Vec<String>) {
-    unimplemented!("Set config values {:?}", &values);
-}
-
 fn main() {
     let cli = Cli::parse();
     match cli.command {
         Commands::Info { keys } => info(keys, cli.format).unwrap(),
-        Commands::Config(subcommand) => match subcommand {
-            ConfigCommands::Show { keys } => show_config(keys),
-            ConfigCommands::Set { values } => set_config(values),
-        },
+        Commands::Config(subcommand) => run_config_cmd(subcommand).unwrap()
     }
 }
