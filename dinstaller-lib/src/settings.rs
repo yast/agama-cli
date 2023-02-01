@@ -47,6 +47,7 @@ impl<'a> Store<'a> {
 
     /// Stores the given installation settings in the D-Bus service
     pub fn store(&self, settings: &Settings) -> Result<(), Box<dyn Error>> {
+        dbg!("Storing the following settings", settings);
         if let Some(users_settings) = &settings.users {
             if let Some(first_user) = &users_settings.first_user {
                 self.users_client.set_first_user(&first_user)?;
@@ -116,6 +117,16 @@ impl ItemsRepository {
                 if let Some(users) = &mut s.users {
                     if let Some(first_user) = &mut users.first_user {
                         first_user.full_name = value.to_string()
+                    }
+                }
+            })
+        );
+        repository.add(
+            Item::new("users.username".parse()?, "First user login".to_string(), |s, value| {
+                // FIXME: We can simplify this code quite a lot by extending the Settings class.
+                if let Some(users) = &mut s.users {
+                    if let Some(first_user) = &mut users.first_user {
+                        first_user.user_name = value.to_string()
                     }
                 }
             })
