@@ -26,7 +26,7 @@ impl Attributes for Settings {
     fn set_attribute(&mut self, attr: &str, value: AttributeValue) -> Result<(), &'static str> {
         if let Some((ns, id)) = attr.split_once(".") {
             match ns {
-                "users" => {
+                "user" => {
                     self.user.set_attribute(id, value)?
                 },
                 _ => return Err("unknown attribute")
