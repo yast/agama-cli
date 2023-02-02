@@ -25,4 +25,6 @@ pub enum Commands {
         /// Configuration keys (e.g., software.products)
         keys: Vec<String>,
     },
+    /// Start probing
+    Probe
 }

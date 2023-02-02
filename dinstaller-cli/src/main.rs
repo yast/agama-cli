@@ -2,7 +2,7 @@ use clap::Parser;
 use std::error;
 
 use dinstaller_cli::commands::{Commands, ConfigCommands};
-use dinstaller_lib::{software, storage, users};
+use dinstaller_lib::{connection,software, storage, users, manager};
 use dinstaller_cli::printers::{print, Format};
 
 #[derive(Parser)]
@@ -45,6 +45,11 @@ fn set_config(values: Vec<String>) {
     unimplemented!("Set config values {:?}", &values);
 }
 
+fn probe() {
+    let client = manager::ManagerClient::new(connection().unwrap()).unwrap();
+    client.probe().unwrap()
+}
+
 fn main() {
     let cli = Cli::parse();
     match cli.command {
@@ -53,5 +58,6 @@ fn main() {
             ConfigCommands::Show { keys } => show_config(keys),
             ConfigCommands::Set { values } => set_config(values),
         },
+        Commands::Probe => probe()
     }
 }
