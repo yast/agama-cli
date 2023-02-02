@@ -4,17 +4,22 @@ use std::{str::FromStr, error::Error};
 
 #[derive(Debug, Default)]
 pub struct Settings {
-    pub users: Option<UsersSettings>,
-    pub storage: Option<StorageSettings>
+    pub users: UsersSettings,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct UsersSettings {
-    pub first_user: Option<FirstUser>
+    pub full_name: String,
+    pub user_name: String,
+    pub password: String,
+    pub autologin: bool,
 }
 
 #[derive(Debug)]
 pub struct StorageSettings {
+    lvm: bool,
+    encryption_password: String
+}
 
 }
 
