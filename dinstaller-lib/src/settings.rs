@@ -5,11 +5,11 @@ use crate::attributes::{Attributes, AttributeValue};
 
 #[derive(Debug, Default)]
 pub struct Settings {
-    pub users: UsersSettings,
+    pub user: UserSettings,
 }
 
 #[derive(Debug, Default)]
-pub struct UsersSettings {
+pub struct UserSettings {
     pub full_name: String,
     pub user_name: String,
     pub password: String,
@@ -27,7 +27,7 @@ impl Attributes for Settings {
         if let Some((ns, id)) = attr.split_once(".") {
             match ns {
                 "users" => {
-                    self.users.set_attribute(id, value)?
+                    self.user.set_attribute(id, value)?
                 },
                 _ => return Err("unknown attribute")
             }
@@ -36,7 +36,7 @@ impl Attributes for Settings {
     }
 }
 
-impl Attributes for UsersSettings {
+impl Attributes for UserSettings {
     fn set_attribute(&mut self, attr: &str, value: AttributeValue) -> Result<(), &'static str> {
         match attr {
             "full_name" => self.full_name = value.try_into()?,
@@ -80,7 +80,7 @@ impl<'a> Store<'a> {
     pub fn load(&self) -> Result<Settings, Box<dyn Error>> {
         let first_user = self.users_client.first_user()?;
         let settings = Settings {
-            users: UsersSettings {
+            user: UserSettings {
                 user_name: first_user.user_name,
                 autologin: first_user.autologin,
                 full_name: first_user.full_name,
@@ -93,11 +93,12 @@ impl<'a> Store<'a> {
     /// Stores the given installation settings in the D-Bus service
     pub fn store(&self, settings: &Settings) -> Result<(), Box<dyn Error>> {
         dbg!("Storing the following settings", settings);
+        // fixme: improve
         let first_user = FirstUser {
-            user_name: settings.users.user_name.clone(),
-            full_name: settings.users.full_name.clone(),
-            autologin: settings.users.autologin.clone(),
-            password: settings.users.password.clone(),
+            user_name: settings.user.user_name.clone(),
+            full_name: settings.user.full_name.clone(),
+            autologin: settings.user.autologin.clone(),
+            password: settings.user.password.clone(),
             ..Default::default()
         };
         self.users_client.set_first_user(&first_user)?;
