@@ -10,7 +10,7 @@ impl TryFrom<AttributeValue> for bool {
     type Error = &'static str;
 
     fn try_from(value: AttributeValue) -> Result<Self, Self::Error> {
-        match value.0.as_str() {
+        match value.0.to_lowercase().as_str() {
             "true" | "yes" | "t" => Ok(true),
             "false" | "no" | "f" => Ok(false),
             _ => Err("not a valid boolean")
