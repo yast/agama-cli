@@ -1,6 +1,7 @@
 use crate::users::{UsersClient,FirstUser};
 use crate::storage::StorageClient;
 use std::{str::FromStr, error::Error};
+use crate::attributes::{Attributes, AttributeValue};
 
 #[derive(Debug, Default)]
 pub struct Settings {
@@ -21,6 +22,42 @@ pub struct StorageSettings {
     encryption_password: String
 }
 
+impl Attributes for Settings {
+    fn set_attribute(&mut self, attr: &str, value: AttributeValue) -> Result<(), &'static str> {
+        if let Some((ns, id)) = attr.split_once(".") {
+            match ns {
+                "users" => {
+                    self.users.set_attribute(id, value)?
+                },
+                _ => return Err("unknown attribute")
+            }
+        }
+        Ok(())
+    }
+}
+
+impl Attributes for UsersSettings {
+    fn set_attribute(&mut self, attr: &str, value: AttributeValue) -> Result<(), &'static str> {
+        match attr {
+            "full_name" => self.full_name = value.try_into()?,
+            "user_name" => self.user_name = value.try_into()?,
+            "password" => self.password = value.try_into()?,
+            "autologin" => self.autologin = value.try_into()?,
+            _ => return Err("unknown attribute")
+        }
+        Ok(())
+    }
+}
+
+impl Attributes for StorageSettings {
+    fn set_attribute(&mut self, attr: &str, value: AttributeValue) -> Result<(), &'static str> {
+        match attr {
+            "lvm" => self.lvm = value.try_into()?,
+            "encryption_password" => self.encryption_password = value.try_into()?,
+            _ => return Err("unknown attribute")
+        }
+        Ok(())
+    }
 }
 
 /// Settings storage
