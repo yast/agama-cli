@@ -1,8 +1,7 @@
 use clap::Subcommand;
-use std::{collections::HashMap, error::Error, str::FromStr};
-use dinstaller_lib::settings::{
-    ItemsRepository, Key as SettingsKey, Store as SettingsStore
-};
+use std::{collections::HashMap, error::Error};
+use dinstaller_lib::settings::Store as SettingsStore;
+use dinstaller_lib::attributes::{Attributes, AttributeValue};
 
 #[derive(Subcommand, Debug)]
 pub enum ConfigCommands {
@@ -19,8 +18,8 @@ pub enum ConfigCommands {
 }
 
 pub enum ConfigAction {
-    Set(HashMap<SettingsKey, String>),
-    Show(Vec<SettingsKey>)
+    Set(HashMap<String, String>),
+    Show(Vec<String>)
 }
 
 pub fn run(subcommand: ConfigCommands) -> Result<(), Box<dyn Error>> {
@@ -28,12 +27,9 @@ pub fn run(subcommand: ConfigCommands) -> Result<(), Box<dyn Error>> {
         ConfigAction::Set(changes) => {
             let store = SettingsStore::new()?;
             let mut model = store.load()?;
-            let settings_items = ItemsRepository::default_repository()?;
-
-            for (key, value) in &changes {
-                if let Some(item) = settings_items.find_by_key(key) {
-                    (item.update_handler)(&mut model, value)
-                }
+            for (key, value) in changes {
+                // fixme: implement conversion from String to AttributeValue
+                model.set_attribute(&key, AttributeValue(value))?;
             }
             store.store(&model)
         },
@@ -44,14 +40,13 @@ pub fn run(subcommand: ConfigCommands) -> Result<(), Box<dyn Error>> {
 fn parse_config_command(subcommand: ConfigCommands) -> ConfigAction {
     match subcommand {
         ConfigCommands::Show { keys } => {
-            let keys = keys.iter().filter_map(|k| SettingsKey::from_str(&k).ok()).collect();
             ConfigAction::Show(keys)
         },
         ConfigCommands::Set { values } => {
-            let changes: HashMap<SettingsKey, String> = values.iter().map(|s| {
+            let changes: HashMap<String, String> = values.iter().map(|s| {
                 let (key, value) = s.split_once("=").unwrap();
-                let key = SettingsKey::from_str(key).unwrap();
-                (key, value.to_string())
+                // let key = SettingsKey::from_str(key).unwrap();
+                (key.to_string(), value.to_string())
             }).collect();
             ConfigAction::Set(changes)
         }

@@ -1,12 +1,13 @@
 use super::proxies::Users1Proxy;
 use zbus::blocking::Connection;
 use serde::Serialize;
+use crate::attributes::{Attributes, AttributeValue};
 
 pub struct UsersClient<'a> {
     users_proxy: Users1Proxy<'a>,
 }
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Debug, Default)]
 pub struct FirstUser {
     pub full_name: String,
     pub user_name: String,
@@ -32,6 +33,19 @@ impl FirstUser {
                 password: "".to_string()
             }
         )
+    }
+}
+
+impl Attributes for FirstUser {
+    fn set_attribute(&mut self, attr: &str, value: AttributeValue) -> Result<(), &'static str> {
+        match attr {
+            "full_name" => self.full_name = value.try_into()?,
+            "user_name" => self.user_name = value.try_into()?,
+            "password" => self.password = value.try_into()?,
+            "autologin" => self.autologin = value.try_into()?,
+            _ => return Err("unknown attribute")
+        }
+        Ok(())
     }
 }
 

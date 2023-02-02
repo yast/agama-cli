@@ -1,6 +1,6 @@
 use std::convert::TryFrom;
 
-pub struct AttributeValue(String);
+pub struct AttributeValue(pub String);
 
 pub trait Attributes {
     fn set_attribute(&mut self, attr: &str, value: AttributeValue) -> Result<(), &'static str>;
