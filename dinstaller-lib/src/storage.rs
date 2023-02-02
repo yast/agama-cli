@@ -47,20 +47,6 @@ impl<'a> StorageClient<'a> {
     }
 }
 
-pub fn available_devices() -> zbus::Result<Vec<StorageDevice>> {
-    let connection = ConnectionBuilder::address("unix:path=/run/d-installer/bus").unwrap()
-        .build().unwrap();
-    let client = StorageClient::new(connection)?;
-    client.available_devices()
-}
-
-pub fn candidate_devices() -> zbus::Result<Vec<String>> {
-    let connection = ConnectionBuilder::address("unix:path=/run/d-installer/bus").unwrap()
-        .build().unwrap();
-    let client = StorageClient::new(connection)?;
-    client.candidate_devices()
-}
-
 #[derive(Serialize, Debug)]
 pub struct StorageDevice {
     name: String,
