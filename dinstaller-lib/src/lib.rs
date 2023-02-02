@@ -1,3 +1,4 @@
+pub mod attributes;
 pub mod software;
 pub mod storage;
 pub mod users;
