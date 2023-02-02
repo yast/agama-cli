@@ -43,10 +43,12 @@ fn parse_config_command(subcommand: ConfigCommands) -> ConfigAction {
             ConfigAction::Show(keys)
         },
         ConfigCommands::Set { values } => {
-            let changes: HashMap<String, String> = values.iter().map(|s| {
-                let (key, value) = s.split_once("=").unwrap();
-                // let key = SettingsKey::from_str(key).unwrap();
-                (key.to_string(), value.to_string())
+            let changes: HashMap<String, String> = values.iter().filter_map(|s| {
+                if let Some((key, value)) = s.split_once("=") {
+                    Some((key.to_string(), value.to_string()))
+                } else {
+                    None
+                }
             }).collect();
             ConfigAction::Set(changes)
         }

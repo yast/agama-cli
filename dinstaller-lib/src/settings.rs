@@ -68,7 +68,7 @@ pub struct Store<'a> {
 }
 
 impl<'a> Store<'a> {
-    pub fn new() -> Result<Self, Box<dyn Error>> {
+    pub fn new() -> Result<Self, zbus::Error> {
         Ok(
             Self {
                 users_client: UsersClient::new(super::connection()?)?
