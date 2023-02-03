@@ -1,6 +1,6 @@
-use super::proxies::{StorageProposalProxy,Storage1Proxy,CalculatorProxy};
-use zbus::blocking::{Connection, ConnectionBuilder};
+use super::proxies::{CalculatorProxy, Storage1Proxy, StorageProposalProxy};
 use serde::Serialize;
+use zbus::blocking::Connection;
 
 pub struct StorageClient<'a> {
     pub connection: Connection,
@@ -10,7 +10,7 @@ pub struct StorageClient<'a> {
 
 impl<'a> StorageClient<'a> {
     pub fn new(connection: Connection) -> zbus::Result<Self> {
-        Ok(Self { 
+        Ok(Self {
             calculator_proxy: CalculatorProxy::new(&connection)?,
             storage_proxy: Storage1Proxy::new(&connection)?,
             connection,
@@ -29,7 +29,9 @@ impl<'a> StorageClient<'a> {
     ///
     /// These devices can be used for installing the system.
     pub fn available_devices(&self) -> zbus::Result<Vec<StorageDevice>> {
-        let devices: Vec<_> = self.calculator_proxy.available_devices()?
+        let devices: Vec<_> = self
+            .calculator_proxy
+            .available_devices()?
             .into_iter()
             .map(|(name, description, _)| StorageDevice { name, description })
             .collect();
@@ -47,22 +49,8 @@ impl<'a> StorageClient<'a> {
     }
 }
 
-pub fn available_devices() -> zbus::Result<Vec<StorageDevice>> {
-    let connection = ConnectionBuilder::address("unix:path=/run/d-installer/bus").unwrap()
-        .build().unwrap();
-    let client = StorageClient::new(connection)?;
-    client.available_devices()
-}
-
-pub fn candidate_devices() -> zbus::Result<Vec<String>> {
-    let connection = ConnectionBuilder::address("unix:path=/run/d-installer/bus").unwrap()
-        .build().unwrap();
-    let client = StorageClient::new(connection)?;
-    client.candidate_devices()
-}
-
 #[derive(Serialize, Debug)]
 pub struct StorageDevice {
     name: String,
-    description: String
+    description: String,
 }

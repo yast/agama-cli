@@ -1,18 +1,5 @@
+use crate::config::ConfigCommands;
 use clap::Subcommand;
-
-#[derive(Subcommand, Debug)]
-pub enum ConfigCommands {
-    /// Set one or many installation settings
-    Set {
-        /// key-value pairs (e.g., user.name="Jane Doe")
-        values: Vec<String>,
-    },
-    /// Shows the value of one or many configuration settings
-    Show {
-        /// Keys to show
-        keys: Vec<String>,
-    },
-}
 
 #[derive(Subcommand, Debug)]
 pub enum Commands {

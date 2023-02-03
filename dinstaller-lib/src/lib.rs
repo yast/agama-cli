@@ -1,3 +1,4 @@
+pub mod attributes;
 pub mod software;
 pub mod storage;
 pub mod users;
@@ -5,15 +6,16 @@ pub mod manager;
 // TODO: maybe expose only clients when we have it?
 pub mod proxies;
 pub mod progress;
+pub mod settings;
 
 use std::path::Path;
 
-pub fn connection() -> Result<zbus::blocking::Connection, zbus::Error>{
+pub fn connection() -> Result<zbus::blocking::Connection, zbus::Error> {
     let path = if Path::new("/run/d-installer/bus").exists() {
         "/run/d-installer/bus"
     } else {
         "/run/dbus/system_bus_socket"
     };
-    let address = format!("unix:path={}", path);
+    let address = format!("unix:path={path}");
     zbus::blocking::ConnectionBuilder::address(address.as_str())?.build()
 }
