@@ -21,7 +21,6 @@ struct Cli {
 
 fn main() {
     let cli = Cli::parse();
-    dbg!(&cli.command);
     match cli.command {
         Commands::Config(subcommand) => run_config_cmd(subcommand, cli.format).unwrap(),
         _ => unimplemented!(),

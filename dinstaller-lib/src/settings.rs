@@ -65,7 +65,6 @@ impl<'a> Store<'a> {
 
     /// Stores the given installation settings in the D-Bus service
     pub fn store(&self, settings: &Settings) -> Result<(), Box<dyn Error>> {
-        dbg!("Storing the following settings", settings);
         // fixme: improve
         let first_user = FirstUser {
             user_name: settings.user.user_name.clone(),
