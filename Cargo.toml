@@ -1,5 +1,6 @@
 [workspace]
 members = [
   "dinstaller-lib",
-  "dinstaller-cli"
+  "dinstaller-cli",
+  "dinstaller-derive"
 ]
