@@ -1,7 +1,8 @@
 use clap::Subcommand;
-use std::{collections::HashMap, error::Error};
+use std::{io, collections::HashMap, error::Error};
 use dinstaller_lib::settings::Store as SettingsStore;
 use dinstaller_lib::attributes::{Attributes, AttributeValue};
+use crate::printers::{print, Format};
 
 #[derive(Subcommand, Debug)]
 pub enum ConfigCommands {
@@ -11,18 +12,15 @@ pub enum ConfigCommands {
         values: Vec<String>,
     },
     /// Shows the value of one or many configuration settings
-    Show {
-        /// Keys to show
-        keys: Vec<String>,
-    },
+    Show
 }
 
 pub enum ConfigAction {
     Set(HashMap<String, String>),
-    Show(Vec<String>)
+    Show
 }
 
-pub fn run(subcommand: ConfigCommands) -> Result<(), Box<dyn Error>> {
+pub fn run(subcommand: ConfigCommands, format: Option<Format>) -> Result<(), Box<dyn Error>> {
     match parse_config_command(subcommand) {
         ConfigAction::Set(changes) => {
             let store = SettingsStore::new()?;
@@ -33,14 +31,19 @@ pub fn run(subcommand: ConfigCommands) -> Result<(), Box<dyn Error>> {
             }
             store.store(&model)
         },
-        _ => unimplemented!()
+        ConfigAction::Show => {
+            let store = SettingsStore::new()?;
+            let model = store.load()?;
+            print(model, io::stdout(), format)?;
+            Ok(())
+        }
     }
 }
 
 fn parse_config_command(subcommand: ConfigCommands) -> ConfigAction {
     match subcommand {
-        ConfigCommands::Show { keys } => {
-            ConfigAction::Show(keys)
+        ConfigCommands::Show => {
+            ConfigAction::Show
         },
         ConfigCommands::Set { values } => {
             let changes: HashMap<String, String> = values.iter().filter_map(|s| {

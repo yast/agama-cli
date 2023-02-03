@@ -1,14 +1,15 @@
-use crate::users::{UsersClient, FirstUser};
 use std::{str::FromStr, error::Error, default::Default};
+use serde::Serialize;
+use crate::users::{UsersClient, FirstUser};
 use crate::attributes::{Attributes, AttributeValue};
 use dinstaller_derive::DInstallerAttributes;
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Serialize)]
 pub struct Settings {
     pub user: UserSettings,
 }
 
-#[derive(Debug, Default, DInstallerAttributes)]
+#[derive(Debug, Default, DInstallerAttributes, Serialize)]
 pub struct UserSettings {
     pub full_name: String,
     pub user_name: String,
@@ -16,7 +17,7 @@ pub struct UserSettings {
     pub autologin: bool,
 }
 
-#[derive(Debug, DInstallerAttributes)]
+#[derive(Debug, DInstallerAttributes, Serialize)]
 pub struct StorageSettings {
     lvm: bool,
     encryption_password: String
