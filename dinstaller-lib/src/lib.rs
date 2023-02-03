@@ -4,6 +4,7 @@ pub mod users;
 pub mod manager;
 // TODO: maybe expose only clients when we have it?
 pub mod proxies;
+pub mod progress;
 
 use std::path::Path;
 

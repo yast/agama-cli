@@ -49,12 +49,17 @@ fn set_config(values: Vec<String>) {
 fn probe() {
     let client = manager::ManagerClient::new(connection().unwrap()).unwrap();
     client.probe().unwrap();
-    let pb = ProgressBar::new(5);
-    for _ in 0..4 {
-        std::thread::sleep(std::time::Duration::from_secs(2));
-        pb.inc(1)
+    let mut progress = client.progress().unwrap();
+    let pb = ProgressBar::new(progress.max_steps.into());
+    loop {
+        if progress.finished {
+            pb.finish();
+            return;
+        }
+        pb.set_position(progress.current_step.into()); // TODO: display also title somewhere
+        std::thread::sleep(std::time::Duration::from_secs(1));
+        progress = client.progress().unwrap();
     }
-    pb.finish()
 }
 
 fn main() {
