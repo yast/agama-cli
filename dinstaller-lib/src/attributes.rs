@@ -13,7 +13,7 @@ impl TryFrom<AttributeValue> for bool {
         match value.0.to_lowercase().as_str() {
             "true" | "yes" | "t" => Ok(true),
             "false" | "no" | "f" => Ok(false),
-            _ => Err("not a valid boolean")
+            _ => Err("not a valid boolean"),
         }
     }
 }

@@ -16,7 +16,7 @@
 use zbus::dbus_proxy;
 
 /// Progress1Proxy can be used also with Software and Storage object.
-/// 
+///
 /// TODO: example
 #[dbus_proxy(
     interface = "org.opensuse.DInstaller.Progress1",

@@ -1,7 +1,7 @@
 use serde::Serialize;
+use std::error;
 use std::fmt::Debug;
 use std::io::Write;
-use std::error;
 
 /// Prints the content using the given format
 ///
@@ -16,8 +16,15 @@ use std::error;
 /// print(user, io::stdout(), Some(Format::Json))
 ///   .expect("Something went wrong!")
 /// ```
-pub fn print<T, W>(content: T, writer: W, format: Option<Format>) -> Result<(), Box<dyn error::Error>>
-where T: serde::Serialize + Debug, W: Write {
+pub fn print<T, W>(
+    content: T,
+    writer: W,
+    format: Option<Format>,
+) -> Result<(), Box<dyn error::Error>>
+where
+    T: serde::Serialize + Debug,
+    W: Write,
+{
     let printer: Box<dyn Printer<T, W>> = match format {
         Some(Format::Json) => Box::new(JsonPrinter { content, writer }),
         Some(Format::Yaml) => Box::new(YamlPrinter { content, writer }),
@@ -31,7 +38,7 @@ where T: serde::Serialize + Debug, W: Write {
 pub enum Format {
     Json,
     Yaml,
-    Text
+    Text,
 }
 
 pub trait Printer<T, W> {
@@ -50,7 +57,7 @@ impl<T: Serialize + Debug, W: Write> Printer<T, W> for JsonPrinter<T, W> {
 }
 pub struct TextPrinter<T, W> {
     content: T,
-    writer: W
+    writer: W,
 }
 
 impl<T: Serialize + Debug, W: Write> Printer<T, W> for TextPrinter<T, W> {
@@ -61,7 +68,7 @@ impl<T: Serialize + Debug, W: Write> Printer<T, W> for TextPrinter<T, W> {
 
 pub struct YamlPrinter<T, W> {
     content: T,
-    writer: W
+    writer: W,
 }
 
 impl<T: Serialize + Debug, W: Write> Printer<T, W> for YamlPrinter<T, W> {

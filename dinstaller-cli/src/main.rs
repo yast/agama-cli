@@ -16,13 +16,13 @@ struct Cli {
 
     /// Format output
     #[arg(value_enum, short, long)]
-    pub format: Option<Format>
+    pub format: Option<Format>,
 }
 
 fn main() {
     let cli = Cli::parse();
     match cli.command {
-        Commands::Config(subcommand) => run_config_cmd(subcommand).unwrap(),
-        _ => unimplemented!()
+        Commands::Config(subcommand) => run_config_cmd(subcommand, cli.format).unwrap(),
+        _ => unimplemented!(),
     }
 }

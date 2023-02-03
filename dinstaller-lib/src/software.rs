@@ -4,7 +4,7 @@ use serde::Serialize;
 pub struct Product {
     pub id: String,
     pub name: String,
-    pub description: String
+    pub description: String,
 }
 
 pub fn products() -> Vec<Product> {
@@ -17,13 +17,14 @@ pub fn products() -> Vec<Product> {
         Product {
             id: "ALP".to_string(),
             name: "SUSE ALP ContainerHost OS".to_string(),
-            description: "'The Adaptable Linux Platform (ALP), the next generation of Linux...".to_string(),
-
+            description: "'The Adaptable Linux Platform (ALP), the next generation of Linux..."
+                .to_string(),
         },
         Product {
             id: "Tumbleweed".to_string(),
             name: "openSUSE Tumbleweed".to_string(),
-            description: "The Tumbleweed distribution is a pure rolling release version...".to_string(),
-        }
+            description: "The Tumbleweed distribution is a pure rolling release version..."
+                .to_string(),
+        },
     ]
 }

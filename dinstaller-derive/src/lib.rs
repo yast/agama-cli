@@ -1,13 +1,16 @@
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{ parse_macro_input, DeriveInput, Fields };
+use syn::{parse_macro_input, DeriveInput, Fields};
 
 #[proc_macro_derive(DInstallerAttributes)]
 pub fn dinstaller_attributes_derive(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     let fields = match &input.data {
-        syn::Data::Struct(syn::DataStruct { fields: Fields::Named(fields), ..}) => &fields.named,
-        _ => panic!("only structs are supported")
+        syn::Data::Struct(syn::DataStruct {
+            fields: Fields::Named(fields),
+            ..
+        }) => &fields.named,
+        _ => panic!("only structs are supported"),
     };
     let field_name = fields.iter().map(|field| &field.ident);
     let name = input.ident;

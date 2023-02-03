@@ -1,5 +1,5 @@
-use clap::Subcommand;
 use crate::config::ConfigCommands;
+use clap::Subcommand;
 
 #[derive(Subcommand, Debug)]
 pub enum Commands {

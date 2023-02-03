@@ -1,14 +1,15 @@
-use crate::users::{UsersClient, FirstUser};
-use std::{str::FromStr, error::Error, default::Default};
-use crate::attributes::{Attributes, AttributeValue};
+use crate::attributes::{AttributeValue, Attributes};
+use crate::users::{FirstUser, UsersClient};
 use dinstaller_derive::DInstallerAttributes;
+use serde::Serialize;
+use std::{default::Default, error::Error, str::FromStr};
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Serialize)]
 pub struct Settings {
     pub user: UserSettings,
 }
 
-#[derive(Debug, Default, DInstallerAttributes)]
+#[derive(Debug, Default, DInstallerAttributes, Serialize)]
 pub struct UserSettings {
     pub full_name: String,
     pub user_name: String,
@@ -16,20 +17,18 @@ pub struct UserSettings {
     pub autologin: bool,
 }
 
-#[derive(Debug, DInstallerAttributes)]
+#[derive(Debug, DInstallerAttributes, Serialize)]
 pub struct StorageSettings {
     lvm: bool,
-    encryption_password: String
+    encryption_password: String,
 }
 
 impl Attributes for Settings {
     fn set_attribute(&mut self, attr: &str, value: AttributeValue) -> Result<(), &'static str> {
-        if let Some((ns, id)) = attr.split_once(".") {
+        if let Some((ns, id)) = attr.split_once('.') {
             match ns {
-                "user" => {
-                    self.user.set_attribute(id, value)?
-                },
-                _ => return Err("unknown attribute")
+                "user" => self.user.set_attribute(id, value)?,
+                _ => return Err("unknown attribute"),
             }
         }
         Ok(())
@@ -45,11 +44,9 @@ pub struct Store<'a> {
 
 impl<'a> Store<'a> {
     pub fn new() -> Result<Self, zbus::Error> {
-        Ok(
-            Self {
-                users_client: UsersClient::new(super::connection()?)?
-            }
-        )
+        Ok(Self {
+            users_client: UsersClient::new(super::connection()?)?,
+        })
     }
 
     /// Loads the installation settings from the D-Bus service
@@ -60,20 +57,19 @@ impl<'a> Store<'a> {
                 user_name: first_user.user_name,
                 autologin: first_user.autologin,
                 full_name: first_user.full_name,
-                password:  first_user.password
-            }
+                password: first_user.password,
+            },
         };
         Ok(settings)
     }
 
     /// Stores the given installation settings in the D-Bus service
     pub fn store(&self, settings: &Settings) -> Result<(), Box<dyn Error>> {
-        dbg!("Storing the following settings", settings);
         // fixme: improve
         let first_user = FirstUser {
             user_name: settings.user.user_name.clone(),
             full_name: settings.user.full_name.clone(),
-            autologin: settings.user.autologin.clone(),
+            autologin: settings.user.autologin,
             password: settings.user.password.clone(),
             ..Default::default()
         };
@@ -90,9 +86,9 @@ impl FromStr for Key {
     type Err = String;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if let Some((ns, id)) = s.split_once(".") {
-            return Ok(Self(ns.to_string(), id.to_string()))
+        if let Some((ns, id)) = s.split_once('.') {
+            return Ok(Self(ns.to_string(), id.to_string()));
         }
-        Err(format!("not a valid configuration key: {}", s).to_string())
+        Err(format!("not a valid configuration key: {s}"))
     }
 }
