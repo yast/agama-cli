@@ -54,8 +54,8 @@ pub struct Store<'a> {
 impl<'a> Store<'a> {
     pub fn new() -> Result<Self, zbus::Error> {
         Ok(Self {
-            users_client: UsersClient::new(super::connection()?)?,
-            software_client: SoftwareClient::new(super::connection()?)?
+            users_client: UsersClient::new(super::connection(None)?)?,
+            software_client: SoftwareClient::new(super::connection(None)?)?
         })
     }
 
@@ -86,6 +86,7 @@ impl<'a> Store<'a> {
             password: settings.user.password.clone(),
             ..Default::default()
         };
+        dbg!(&settings);
         self.software_client.select_product(&settings.software.product)?;
         self.users_client.set_first_user(&first_user)?;
         Ok(())

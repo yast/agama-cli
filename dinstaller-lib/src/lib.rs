@@ -2,18 +2,29 @@ pub mod attributes;
 pub mod software;
 pub mod storage;
 pub mod users;
-// TODO: maybe expose only clients when we have it?
-pub mod proxies;
+mod proxies;
 pub mod settings;
 
-use std::path::Path;
+use std::fs;
+use zbus::blocking::{Connection, ConnectionBuilder};
 
-pub fn connection() -> Result<zbus::blocking::Connection, zbus::Error> {
-    let path = if Path::new("/run/d-installer/bus").exists() {
-        "/run/d-installer/bus"
-    } else {
-        "/run/dbus/system_bus_socket"
+pub fn connection(address: Option<String>) -> Result<Connection, zbus::Error> {
+    let bus_address = match address {
+        Some(address) => address,
+        None => find_bus_address()
     };
-    let address = format!("unix:path={path}");
-    zbus::blocking::ConnectionBuilder::address(address.as_str())?.build()
+
+    println!("using {}", bus_address);
+    ConnectionBuilder::address(bus_address.as_str())?.build()
 }
+
+const DBUS_ADDRESS_FILE: &str = "/run/d-installer/bus.address";
+
+fn find_bus_address() -> String {
+    if let Ok(contents) = fs::read_to_string(DBUS_ADDRESS_FILE) {
+        return contents;
+    }
+
+    format!("unix:path=/run/dbus/system_bus_socket")
+}
+
