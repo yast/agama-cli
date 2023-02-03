@@ -4,6 +4,7 @@ use std::error;
 use dinstaller_cli::commands::{Commands, ConfigCommands};
 use dinstaller_lib::{connection,software, storage, users, manager};
 use dinstaller_cli::printers::{print, Format};
+use indicatif::ProgressBar;
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
@@ -47,7 +48,13 @@ fn set_config(values: Vec<String>) {
 
 fn probe() {
     let client = manager::ManagerClient::new(connection().unwrap()).unwrap();
-    client.probe().unwrap()
+    client.probe().unwrap();
+    let pb = ProgressBar::new(5);
+    for _ in 0..4 {
+        std::thread::sleep(std::time::Duration::from_secs(2));
+        pb.inc(1)
+    }
+    pb.finish()
 }
 
 fn main() {
