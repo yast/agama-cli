@@ -1,7 +1,7 @@
 use super::proxies::Users1Proxy;
-use zbus::blocking::Connection;
+use crate::attributes::{AttributeValue, Attributes};
 use serde::Serialize;
-use crate::attributes::{Attributes, AttributeValue};
+use zbus::blocking::Connection;
 
 pub struct UsersClient<'a> {
     users_proxy: Users1Proxy<'a>,
@@ -13,26 +13,26 @@ pub struct FirstUser {
     pub user_name: String,
     pub password: String,
     pub autologin: bool,
-    pub data: std::collections::HashMap<String, zbus::zvariant::OwnedValue>
+    pub data: std::collections::HashMap<String, zbus::zvariant::OwnedValue>,
 }
 
 impl FirstUser {
-    fn from_dbus(dbus_data: zbus::Result<(
-        String,
-        String,
-        bool,
-        std::collections::HashMap<String, zbus::zvariant::OwnedValue>,
-    )>) -> zbus::Result<Self> {
+    fn from_dbus(
+        dbus_data: zbus::Result<(
+            String,
+            String,
+            bool,
+            std::collections::HashMap<String, zbus::zvariant::OwnedValue>,
+        )>,
+    ) -> zbus::Result<Self> {
         let data = dbus_data?;
-        Ok(
-            Self { 
-                full_name: data.0,
-                user_name: data.1,
-                autologin: data.2,
-                data: data.3,
-                password: "".to_string()
-            }
-        )
+        Ok(Self {
+            full_name: data.0,
+            user_name: data.1,
+            autologin: data.2,
+            data: data.3,
+            password: "".to_string(),
+        })
     }
 }
 
@@ -43,7 +43,7 @@ impl Attributes for FirstUser {
             "user_name" => self.user_name = value.try_into()?,
             "password" => self.password = value.try_into()?,
             "autologin" => self.autologin = value.try_into()?,
-            _ => return Err("unknown attribute")
+            _ => return Err("unknown attribute"),
         }
         Ok(())
     }
@@ -51,8 +51,8 @@ impl Attributes for FirstUser {
 
 impl<'a> UsersClient<'a> {
     pub fn new(connection: Connection) -> zbus::Result<Self> {
-        Ok(Self { 
-            users_proxy: Users1Proxy::new(&connection)?
+        Ok(Self {
+            users_proxy: Users1Proxy::new(&connection)?,
         })
     }
 
@@ -75,7 +75,7 @@ impl<'a> UsersClient<'a> {
             &first_user.user_name,
             &first_user.password,
             first_user.autologin,
-            std::collections::HashMap::new()
+            std::collections::HashMap::new(),
         )
     }
 }

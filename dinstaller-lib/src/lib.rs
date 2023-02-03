@@ -8,7 +8,7 @@ pub mod settings;
 
 use std::path::Path;
 
-pub fn connection() -> Result<zbus::blocking::Connection, zbus::Error>{
+pub fn connection() -> Result<zbus::blocking::Connection, zbus::Error> {
     let path = if Path::new("/run/d-installer/bus").exists() {
         "/run/d-installer/bus"
     } else {

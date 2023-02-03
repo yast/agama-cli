@@ -16,7 +16,7 @@ struct Cli {
 
     /// Format output
     #[arg(value_enum, short, long)]
-    pub format: Option<Format>
+    pub format: Option<Format>,
 }
 
 fn main() {
@@ -24,6 +24,6 @@ fn main() {
     dbg!(&cli.command);
     match cli.command {
         Commands::Config(subcommand) => run_config_cmd(subcommand, cli.format).unwrap(),
-        _ => unimplemented!()
+        _ => unimplemented!(),
     }
 }
