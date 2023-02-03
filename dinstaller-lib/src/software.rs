@@ -1,4 +1,6 @@
+use super::proxies::Software1Proxy;
 use serde::Serialize;
+use zbus::blocking::Connection;
 
 #[derive(Debug, Serialize)]
 pub struct Product {
@@ -7,24 +9,40 @@ pub struct Product {
     pub description: String,
 }
 
-pub fn products() -> Vec<Product> {
-    vec![
-        Product {
-            id: "Leap".to_string(),
-            name: "openSUSE Leap 15.4".to_string(),
-            description: "Leap uses source from SUSE Linux Enterprise (SLE), which...".to_string(),
-        },
-        Product {
-            id: "ALP".to_string(),
-            name: "SUSE ALP ContainerHost OS".to_string(),
-            description: "'The Adaptable Linux Platform (ALP), the next generation of Linux..."
-                .to_string(),
-        },
-        Product {
-            id: "Tumbleweed".to_string(),
-            name: "openSUSE Tumbleweed".to_string(),
-            description: "The Tumbleweed distribution is a pure rolling release version..."
-                .to_string(),
-        },
-    ]
+pub struct SoftwareClient<'a> {
+    pub connection: Connection,
+    software_proxy: Software1Proxy<'a>,
+}
+
+impl<'a> SoftwareClient<'a> {
+    pub fn new(connection: Connection) -> zbus::Result<Self> {
+        Ok(Self {
+            software_proxy: Software1Proxy::new(&connection)?,
+            connection,
+        })
+    }
+
+    pub fn products(&self) -> zbus::Result<Vec<Product>> {
+        let products: Vec<Product> = self.software_proxy.available_base_products()?
+            .into_iter().map(|(id, name, data)| {
+                let description = match data.get("description") {
+                    Some(value) => value.try_into().unwrap(),
+                    None => ""
+                };
+                Product {
+                    id,
+                    name,
+                    description: description.to_string()
+                }
+            }).collect();
+        Ok(products)
+    }
+
+    pub fn product(&self) -> zbus::Result<String> {
+        self.software_proxy.selected_base_product()
+    }
+
+    pub fn select_product(&self, product_id: &str) -> zbus::Result<()> {
+        self.software_proxy.select_product(product_id)
+    }
 }
