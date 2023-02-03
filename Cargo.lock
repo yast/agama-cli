@@ -240,9 +240,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "dinstaller-derive"
+version = "0.1.0"
+dependencies = [
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "dinstaller-lib"
 version = "0.1.0"
 dependencies = [
+ "dinstaller-derive",
  "serde",
  "zbus",
 ]
