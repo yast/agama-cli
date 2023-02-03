@@ -38,6 +38,12 @@ fn probe() {
 }
 
 fn main() {
+    let manager = manager::ManagerClient::new(dinstaller_lib::connection().unwrap()).unwrap();
+    let services = manager.busy_services().unwrap();
+    if !services.is_empty() {
+        eprintln!("There are busy services {:?}. Cannot do command.", services);
+        return;
+    }
     let cli = Cli::parse();
     match cli.command {
         Commands::Config(subcommand) => run_config_cmd(subcommand, cli.format).unwrap(),
