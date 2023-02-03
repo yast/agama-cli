@@ -10,15 +10,13 @@ pub struct Product {
 }
 
 pub struct SoftwareClient<'a> {
-    pub connection: Connection,
     software_proxy: Software1Proxy<'a>,
 }
 
 impl<'a> SoftwareClient<'a> {
     pub fn new(connection: Connection) -> zbus::Result<Self> {
         Ok(Self {
-            software_proxy: Software1Proxy::new(&connection)?,
-            connection,
+            software_proxy: Software1Proxy::new(&connection)?
         })
     }
 
