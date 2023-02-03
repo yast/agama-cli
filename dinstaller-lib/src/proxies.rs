@@ -21,7 +21,9 @@ use zbus::dbus_proxy;
 #[dbus_proxy(
     interface = "org.opensuse.DInstaller.Progress1",
     default_service = "org.opensuse.DInstaller",
-    default_path = "/org/opensuse/DInstaller/Manager1"
+    default_path = "/org/opensuse/DInstaller/Manager1",
+    gen_async = false,
+    gen_blocking = true
 )]
 trait Progress1 {
     /// CurrentStep property
@@ -41,7 +43,9 @@ trait Progress1 {
 #[dbus_proxy(
     interface = "org.opensuse.DInstaller.ServiceStatus1",
     default_service = "org.opensuse.DInstaller",
-    default_path = "/org/opensuse/DInstaller/Manager1"
+    default_path = "/org/opensuse/DInstaller/Manager1",
+    gen_async = false,
+    gen_blocking = true
 )]
 trait ServiceStatus1 {
     /// All property
@@ -58,7 +62,9 @@ trait ServiceStatus1 {
 #[dbus_proxy(
     interface = "org.opensuse.DInstaller.Manager1",
     default_service = "org.opensuse.DInstaller",
-    default_path = "/org/opensuse/DInstaller/Manager1"
+    default_path = "/org/opensuse/DInstaller/Manager1",
+    gen_async = false,
+    gen_blocking = true
 )]
 trait Manager1 {
     /// CanInstall method

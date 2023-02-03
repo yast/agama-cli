@@ -2,8 +2,10 @@ pub mod attributes;
 pub mod software;
 pub mod storage;
 pub mod users;
+pub mod manager;
 // TODO: maybe expose only clients when we have it?
 pub mod proxies;
+pub mod progress;
 pub mod settings;
 
 use std::path::Path;
