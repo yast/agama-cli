@@ -25,7 +25,7 @@ pub struct StorageSettings {
 
 impl Attributes for Settings {
     fn set_attribute(&mut self, attr: &str, value: AttributeValue) -> Result<(), &'static str> {
-        if let Some((ns, id)) = attr.split_once(".") {
+        if let Some((ns, id)) = attr.split_once('.') {
             match ns {
                 "user" => {
                     self.user.set_attribute(id, value)?
@@ -74,7 +74,7 @@ impl<'a> Store<'a> {
         let first_user = FirstUser {
             user_name: settings.user.user_name.clone(),
             full_name: settings.user.full_name.clone(),
-            autologin: settings.user.autologin.clone(),
+            autologin: settings.user.autologin,
             password: settings.user.password.clone(),
             ..Default::default()
         };
@@ -91,9 +91,9 @@ impl FromStr for Key {
     type Err = String;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if let Some((ns, id)) = s.split_once(".") {
+        if let Some((ns, id)) = s.split_once('.') {
             return Ok(Self(ns.to_string(), id.to_string()))
         }
-        Err(format!("not a valid configuration key: {}", s).to_string())
+        Err(format!("not a valid configuration key: {s}"))
     }
 }

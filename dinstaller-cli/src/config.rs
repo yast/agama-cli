@@ -47,7 +47,7 @@ fn parse_config_command(subcommand: ConfigCommands) -> ConfigAction {
         },
         ConfigCommands::Set { values } => {
             let changes: HashMap<String, String> = values.iter().filter_map(|s| {
-                if let Some((key, value)) = s.split_once("=") {
+                if let Some((key, value)) = s.split_once('=') {
                     Some((key.to_string(), value.to_string()))
                 } else {
                     None

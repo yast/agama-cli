@@ -14,6 +14,6 @@ pub fn connection() -> Result<zbus::blocking::Connection, zbus::Error>{
     } else {
         "/run/dbus/system_bus_socket"
     };
-    let address = format!("unix:path={}", path);
+    let address = format!("unix:path={path}");
     zbus::blocking::ConnectionBuilder::address(address.as_str())?.build()
 }

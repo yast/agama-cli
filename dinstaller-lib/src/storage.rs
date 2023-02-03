@@ -1,5 +1,5 @@
 use super::proxies::{StorageProposalProxy,Storage1Proxy,CalculatorProxy};
-use zbus::blocking::{Connection, ConnectionBuilder};
+use zbus::blocking::{Connection};
 use serde::Serialize;
 
 pub struct StorageClient<'a> {
