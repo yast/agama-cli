@@ -151,7 +151,9 @@ trait Questions1 {
 #[dbus_proxy(
     interface = "org.opensuse.DInstaller.Software1",
     default_service = "org.opensuse.DInstaller.Software",
-    default_path = "/org/opensuse/DInstaller/Software1"
+    default_path = "/org/opensuse/DInstaller/Software1",
+    gen_async = false,
+    gen_blocking = true
 )]
 trait Software1 {
     /// Finish method
@@ -198,7 +200,9 @@ trait Software1 {
 #[dbus_proxy(
     interface = "org.opensuse.DInstaller.Software.Proposal1",
     default_service = "org.opensuse.DInstaller.Software",
-    default_path = "/org/opensuse/DInstaller/Software/Proposal1"
+    default_path = "/org/opensuse/DInstaller/Software/Proposal1",
+    gen_async = false,
+    gen_blocking = true
 )]
 trait SoftwareProposal1 {
     /// AddResolvables method
