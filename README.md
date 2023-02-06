@@ -52,11 +52,21 @@ $ sudo ./target/debug/dinstaller-cli config show
 {"user":{"full_name":"Jane Doe","user_name":"jane.doe","password":"","autologin":true},"software":{"product":"Tumbleweed"}}
 ```
 
+If, at some point you want to force a new probing, you can ask D-Installer to repeat the process again:
+
+```
+$ sudo ./target/debug/dinstaller-cli probe
+```
+
 ## Caveats
 
-If you give `dinstaller-rs` a try, beware that after merging
-[imobachgs/dinstaller-rs#12](https://github.com/imobachgs/dinstaller-rs/pull/12), setting any option
-is rather slow. The problem is that we are sending all the configuration settings, including the
-selected product, which is a slow operation. To avoid this problem we could 1) stop sending
-unchanged data and/or 2) do not reload the repositories if the product did not change (in the
-D-Installer side).
+* After merging
+  [imobachgs/dinstaller-rs#12](https://github.com/imobachgs/dinstaller-rs/pull/12),
+  setting any option is rather slow. The problem is that we are sending all the
+  configuration settings, including the selected product, which is a rather
+  slow operation. To avoid this problem we could 1) stop sending unchanged data
+  and/or 2) do not reload the repositories if the product did not change (in
+  the D-Installer side).
+* If no product is selected, the `probe` command will fail.
+* If any of the D-Installer service is busy, `dinstaller-cli` will refuse to
+  work, even if the service that specific service is not needed at all.
