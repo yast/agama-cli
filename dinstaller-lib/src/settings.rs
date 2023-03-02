@@ -1,10 +1,17 @@
+//! Configuration settings handling
+//!
+//! This module implements the mechanisms to load and store the installation settings.
 use crate::attributes::{AttributeValue, Attributes};
-use crate::users::{FirstUser, UsersClient};
 use crate::software::SoftwareClient;
+use crate::users::{FirstUser, UsersClient};
 use dinstaller_derive::DInstallerAttributes;
 use serde::Serialize;
-use std::{default::Default, error::Error, str::FromStr};
+use std::{default::Default, error::Error};
 
+/// Installation settings
+///
+/// This struct represents installation settings. It serves as an entry point and it is composed of
+/// other structs which hold the settings for each area ("users", "software", etc.).
 #[derive(Debug, Default, Serialize)]
 pub struct Settings {
     pub user: UserSettings,
@@ -24,38 +31,50 @@ impl Attributes for Settings {
     }
 }
 
+/// User settings
+///
+/// Holds the user settings for the installation.
 #[derive(Debug, Default, DInstallerAttributes, Serialize)]
 pub struct UserSettings {
+    /// First user's full name
     pub full_name: String,
+    /// First user's username
     pub user_name: String,
+    /// First user's password (in clear text)
     pub password: String,
+    /// Whether auto-login should enabled or not
     pub autologin: bool,
 }
 
+/// Storage settings for installation
 #[derive(Debug, DInstallerAttributes, Serialize)]
 pub struct StorageSettings {
+    /// Whether LVM should be enabled
     lvm: bool,
+    /// Encryption password for the storage devices (in clear text)
     encryption_password: String,
 }
 
+/// Software settings for installation
 #[derive(Debug, Default, DInstallerAttributes, Serialize)]
 pub struct SoftwareSettings {
-    product: String
+    /// ID of the product to install (e.g., "ALP", "Tumbleweed", etc.)
+    product: String,
 }
 
-/// Settings storage
+/// Loading and storing the settings in the D-Bus service
 ///
-/// It is responsible for loading and storing the settings in the D-Bus service.
+/// This struct uses the default connection built by [connection function](super::connection).
 pub struct Store<'a> {
     users_client: UsersClient<'a>,
-    software_client: SoftwareClient<'a>
+    software_client: SoftwareClient<'a>,
 }
 
 impl<'a> Store<'a> {
     pub fn new() -> Result<Self, zbus::Error> {
         Ok(Self {
             users_client: UsersClient::new(super::connection()?)?,
-            software_client: SoftwareClient::new(super::connection()?)?
+            software_client: SoftwareClient::new(super::connection()?)?,
         })
     }
 
@@ -86,23 +105,9 @@ impl<'a> Store<'a> {
             password: settings.user.password.clone(),
             ..Default::default()
         };
-        self.software_client.select_product(&settings.software.product)?;
+        self.software_client
+            .select_product(&settings.software.product)?;
         self.users_client.set_first_user(&first_user)?;
         Ok(())
-    }
-}
-
-/// Represents a key (the name) of a settings item
-#[derive(Debug, PartialEq, Eq, Hash)]
-pub struct Key(pub String, pub String);
-
-impl FromStr for Key {
-    type Err = String;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if let Some((ns, id)) = s.split_once('.') {
-            return Ok(Self(ns.to_string(), id.to_string()));
-        }
-        Err(format!("not a valid configuration key: {s}"))
     }
 }
