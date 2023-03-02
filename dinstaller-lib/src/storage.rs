@@ -2,6 +2,14 @@ use super::proxies::{CalculatorProxy, Storage1Proxy, StorageProposalProxy};
 use serde::Serialize;
 use zbus::blocking::Connection;
 
+/// Represents a storage device
+#[derive(Serialize, Debug)]
+pub struct StorageDevice {
+    name: String,
+    description: String,
+}
+
+/// D-Bus client for the storage service
 pub struct StorageClient<'a> {
     pub connection: Connection,
     calculator_proxy: CalculatorProxy<'a>,
@@ -47,10 +55,4 @@ impl<'a> StorageClient<'a> {
     pub fn probe(&self) -> zbus::Result<()> {
         self.storage_proxy.probe()
     }
-}
-
-#[derive(Serialize, Debug)]
-pub struct StorageDevice {
-    name: String,
-    description: String,
 }
