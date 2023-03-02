@@ -1,7 +1,7 @@
 use crate::printers::{print, Format};
 use clap::Subcommand;
 use dinstaller_lib::attributes::{AttributeValue, Attributes};
-use dinstaller_lib::settings::Store as SettingsStore;
+use dinstaller_lib::Store as SettingsStore;
 use std::{collections::HashMap, error::Error, io};
 
 #[derive(Subcommand, Debug)]
