@@ -1,12 +1,14 @@
 pub mod attributes;
+pub mod manager;
 pub mod software;
 pub mod storage;
 pub mod users;
-pub mod manager;
 // TODO: maybe expose only clients when we have it?
-pub mod proxies;
 pub mod progress;
+pub mod proxies;
 pub mod settings;
+mod store;
+pub use store::Store;
 
 use std::path::Path;
 
