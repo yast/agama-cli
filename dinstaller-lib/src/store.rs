@@ -25,6 +25,7 @@ impl<'a> Store<'a> {
         let product = self.software_client.product()?;
 
         let settings = Settings {
+            storage: Default::default(),
             software: SoftwareSettings { product },
             user: UserSettings {
                 user_name: first_user.user_name,

@@ -6,6 +6,8 @@ use std::{collections::HashMap, error::Error, io};
 
 #[derive(Subcommand, Debug)]
 pub enum ConfigCommands {
+    /// Add an element to a collection
+    Add { key: String, value: String },
     /// Set one or many installation settings
     Set {
         /// key-value pairs (e.g., user.name="Jane Doe")
@@ -16,32 +18,36 @@ pub enum ConfigCommands {
 }
 
 pub enum ConfigAction {
+    Add(String, String),
     Set(HashMap<String, String>),
     Show,
 }
 
 pub fn run(subcommand: ConfigCommands, format: Option<Format>) -> Result<(), Box<dyn Error>> {
+    let store = SettingsStore::new()?;
+    let mut model = store.load()?;
+
     match parse_config_command(subcommand) {
         ConfigAction::Set(changes) => {
-            let store = SettingsStore::new()?;
-            let mut model = store.load()?;
             for (key, value) in changes {
-                // fixme: implement conversion from String to AttributeValue
-                model.set_attribute(&key, AttributeValue(value))?;
+                model.set(&key, AttributeValue(value))?;
             }
             store.store(&model)
         }
         ConfigAction::Show => {
-            let store = SettingsStore::new()?;
-            let model = store.load()?;
             print(model, io::stdout(), format)?;
             Ok(())
+        }
+        ConfigAction::Add(key, value) => {
+            model.add(&key, AttributeValue(value))?;
+            store.store(&model)
         }
     }
 }
 
 fn parse_config_command(subcommand: ConfigCommands) -> ConfigAction {
     match subcommand {
+        ConfigCommands::Add { key, value } => ConfigAction::Add(key, value),
         ConfigCommands::Show => ConfigAction::Show,
         ConfigCommands::Set { values } => {
             let changes: HashMap<String, String> = values

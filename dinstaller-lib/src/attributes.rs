@@ -38,10 +38,10 @@ use std::convert::TryFrom;
 /// }
 ///
 /// impl Attributes for Settings {
-///   fn set_attribute(&mut self, attr: &str, value: AttributeValue) -> Result<(), &'static str> {
+///   fn set(&mut self, attr: &str, value: AttributeValue) -> Result<(), &'static str> {
 ///     if let Some((ns, id)) = attr.split_once('.') {
 ///       match ns {
-///         "user" => self.user.set_attribute(id, value)?,
+///         "user" => self.user.set(id, value)?,
 ///         _ => return Err("unknown attribute")
 ///       }
 ///     }
@@ -51,13 +51,19 @@ use std::convert::TryFrom;
 ///
 /// let user = UserSettings { name: "foo".to_string(), enabled: false };
 /// let mut settings = Settings { user };
-/// settings.set_attribute("user.name", AttributeValue("foo.bar".to_string()));
-/// settings.set_attribute("user.enabled", AttributeValue("true".to_string()));
+/// settings.set("user.name", AttributeValue("foo.bar".to_string()));
+/// settings.set("user.enabled", AttributeValue("true".to_string()));
 /// assert!(&settings.user.enabled);
 /// assert_eq!(&settings.user.name, "foo.bar");
 /// ```
 pub trait Attributes {
-    fn set_attribute(&mut self, attr: &str, value: AttributeValue) -> Result<(), &'static str>;
+    fn add(&mut self, _attr: &str, _value: AttributeValue) -> Result<(), &'static str> {
+        Err("unknown collection")
+    }
+
+    fn set(&mut self, _attr: &str, _value: AttributeValue) -> Result<(), &'static str> {
+        Err("unknown attribute")
+    }
 }
 
 /// Represents a string-based value and allows converting them to other types

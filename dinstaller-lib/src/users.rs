@@ -41,7 +41,7 @@ impl FirstUser {
 }
 
 impl Attributes for FirstUser {
-    fn set_attribute(&mut self, attr: &str, value: AttributeValue) -> Result<(), &'static str> {
+    fn set(&mut self, attr: &str, value: AttributeValue) -> Result<(), &'static str> {
         match attr {
             "full_name" => self.full_name = value.try_into()?,
             "user_name" => self.user_name = value.try_into()?,

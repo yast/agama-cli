@@ -14,14 +14,28 @@ use std::default::Default;
 pub struct Settings {
     pub user: UserSettings,
     pub software: SoftwareSettings,
+    pub storage: StorageSettings,
 }
 
 impl Attributes for Settings {
-    fn set_attribute(&mut self, attr: &str, value: AttributeValue) -> Result<(), &'static str> {
+    fn add(&mut self, attr: &str, value: AttributeValue) -> Result<(), &'static str> {
         if let Some((ns, id)) = attr.split_once('.') {
             match ns {
-                "software" => self.software.set_attribute(id, value)?,
-                "user" => self.user.set_attribute(id, value)?,
+                "software" => self.software.add(id, value)?,
+                "user" => self.user.add(id, value)?,
+                "storage" => self.storage.add(id, value)?,
+                _ => return Err("unknown attribute"),
+            }
+        }
+        Ok(())
+    }
+
+    fn set(&mut self, attr: &str, value: AttributeValue) -> Result<(), &'static str> {
+        if let Some((ns, id)) = attr.split_once('.') {
+            match ns {
+                "software" => self.software.set(id, value)?,
+                "user" => self.user.set(id, value)?,
+                "storage" => self.storage.set(id, value)?,
                 _ => return Err("unknown attribute"),
             }
         }
@@ -45,13 +59,18 @@ pub struct UserSettings {
 }
 
 /// Storage settings for installation
-#[derive(Debug, DInstallerAttributes, Serialize)]
+#[derive(Debug, Default, DInstallerAttributes, Serialize)]
 pub struct StorageSettings {
     /// Whether LVM should be enabled
     pub lvm: bool,
     /// Encryption password for the storage devices (in clear text)
     pub encryption_password: String,
+    /// Devices to use in the installation
+    #[collection]
+    pub devices: Vec<String>,
 }
+
+pub struct Device(String);
 
 /// Software settings for installation
 #[derive(Debug, Default, DInstallerAttributes, Serialize)]
