@@ -1,4 +1,4 @@
-use crate::settings::{Settings, SoftwareSettings, UserSettings};
+use crate::install_settings::{InstallSettings, SoftwareSettings, UserSettings};
 use crate::software::SoftwareClient;
 use crate::users::{FirstUser, UsersClient};
 use std::{default::Default, error::Error};
@@ -20,11 +20,11 @@ impl<'a> Store<'a> {
     }
 
     /// Loads the installation settings from the D-Bus service
-    pub fn load(&self) -> Result<Settings, Box<dyn Error>> {
+    pub fn load(&self) -> Result<InstallSettings, Box<dyn Error>> {
         let first_user = self.users_client.first_user()?;
         let product = self.software_client.product()?;
 
-        let settings = Settings {
+        let settings = InstallSettings {
             storage: Default::default(),
             software: SoftwareSettings { product },
             user: UserSettings {
@@ -38,7 +38,7 @@ impl<'a> Store<'a> {
     }
 
     /// Stores the given installation settings in the D-Bus service
-    pub fn store(&self, settings: &Settings) -> Result<(), Box<dyn Error>> {
+    pub fn store(&self, settings: &InstallSettings) -> Result<(), Box<dyn Error>> {
         // fixme: improve
         let first_user = FirstUser {
             user_name: settings.user.user_name.clone(),

@@ -11,13 +11,13 @@ use std::default::Default;
 /// This struct represents installation settings. It serves as an entry point and it is composed of
 /// other structs which hold the settings for each area ("users", "software", etc.).
 #[derive(Debug, Default, Serialize)]
-pub struct Settings {
+pub struct InstallSettings {
     pub user: UserSettings,
     pub software: SoftwareSettings,
     pub storage: StorageSettings,
 }
 
-impl Attributes for Settings {
+impl Attributes for InstallSettings {
     fn add(&mut self, attr: &str, value: AttributeValue) -> Result<(), &'static str> {
         if let Some((ns, id)) = attr.split_once('.') {
             match ns {

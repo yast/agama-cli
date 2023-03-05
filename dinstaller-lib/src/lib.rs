@@ -1,4 +1,5 @@
 pub mod attributes;
+pub mod install_settings;
 pub mod manager;
 pub mod software;
 pub mod storage;
@@ -6,7 +7,6 @@ pub mod users;
 // TODO: maybe expose only clients when we have it?
 pub mod progress;
 pub mod proxies;
-pub mod settings;
 mod store;
 pub use store::Store;
 
