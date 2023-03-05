@@ -1,7 +1,7 @@
 //! Users configuration support
 
 use super::proxies::Users1Proxy;
-use crate::attributes::{AttributeValue, Attributes};
+use crate::settings::{SettingValue, Settings};
 use serde::Serialize;
 use zbus::blocking::Connection;
 
@@ -40,8 +40,8 @@ impl FirstUser {
     }
 }
 
-impl Attributes for FirstUser {
-    fn set(&mut self, attr: &str, value: AttributeValue) -> Result<(), &'static str> {
+impl Settings for FirstUser {
+    fn set(&mut self, attr: &str, value: SettingValue) -> Result<(), &'static str> {
         match attr {
             "full_name" => self.full_name = value.try_into()?,
             "user_name" => self.user_name = value.try_into()?,

@@ -1,6 +1,6 @@
 use crate::printers::{print, Format};
 use clap::Subcommand;
-use dinstaller_lib::attributes::{AttributeValue, Attributes};
+use dinstaller_lib::settings::{SettingValue, Settings};
 use dinstaller_lib::Store as SettingsStore;
 use std::{collections::HashMap, error::Error, io};
 
@@ -30,7 +30,7 @@ pub fn run(subcommand: ConfigCommands, format: Option<Format>) -> Result<(), Box
     match parse_config_command(subcommand) {
         ConfigAction::Set(changes) => {
             for (key, value) in changes {
-                model.set(&key, AttributeValue(value))?;
+                model.set(&key, SettingValue(value))?;
             }
             store.store(&model)
         }
@@ -39,7 +39,7 @@ pub fn run(subcommand: ConfigCommands, format: Option<Format>) -> Result<(), Box
             Ok(())
         }
         ConfigAction::Add(key, value) => {
-            model.add(&key, AttributeValue(value))?;
+            model.add(&key, SettingValue(value))?;
             store.store(&model)
         }
     }

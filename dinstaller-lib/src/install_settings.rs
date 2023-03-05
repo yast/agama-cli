@@ -1,8 +1,8 @@
 //! Configuration settings handling
 //!
 //! This module implements the mechanisms to load and store the installation settings.
-use crate::attributes::{AttributeValue, Attributes};
-use dinstaller_derive::DInstallerAttributes;
+use crate::settings::{SettingValue, Settings};
+use dinstaller_derive::Settings;
 use serde::Serialize;
 use std::default::Default;
 
@@ -17,8 +17,8 @@ pub struct InstallSettings {
     pub storage: StorageSettings,
 }
 
-impl Attributes for InstallSettings {
-    fn add(&mut self, attr: &str, value: AttributeValue) -> Result<(), &'static str> {
+impl Settings for InstallSettings {
+    fn add(&mut self, attr: &str, value: SettingValue) -> Result<(), &'static str> {
         if let Some((ns, id)) = attr.split_once('.') {
             match ns {
                 "software" => self.software.add(id, value)?,
@@ -30,7 +30,7 @@ impl Attributes for InstallSettings {
         Ok(())
     }
 
-    fn set(&mut self, attr: &str, value: AttributeValue) -> Result<(), &'static str> {
+    fn set(&mut self, attr: &str, value: SettingValue) -> Result<(), &'static str> {
         if let Some((ns, id)) = attr.split_once('.') {
             match ns {
                 "software" => self.software.set(id, value)?,
@@ -46,7 +46,7 @@ impl Attributes for InstallSettings {
 /// User settings
 ///
 /// Holds the user settings for the installation.
-#[derive(Debug, Default, DInstallerAttributes, Serialize)]
+#[derive(Debug, Default, Settings, Serialize)]
 pub struct UserSettings {
     /// First user's full name
     pub full_name: String,
@@ -59,21 +59,21 @@ pub struct UserSettings {
 }
 
 /// Storage settings for installation
-#[derive(Debug, Default, DInstallerAttributes, Serialize)]
+#[derive(Debug, Default, Settings, Serialize)]
 pub struct StorageSettings {
     /// Whether LVM should be enabled
     pub lvm: bool,
     /// Encryption password for the storage devices (in clear text)
     pub encryption_password: String,
     /// Devices to use in the installation
-    #[collection]
+    #[collection_setting]
     pub devices: Vec<String>,
 }
 
 pub struct Device(String);
 
 /// Software settings for installation
-#[derive(Debug, Default, DInstallerAttributes, Serialize)]
+#[derive(Debug, Default, Settings, Serialize)]
 pub struct SoftwareSettings {
     /// ID of the product to install (e.g., "ALP", "Tumbleweed", etc.)
     pub product: String,

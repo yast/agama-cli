@@ -8,8 +8,8 @@
 //! * a value, which is captured as a string (`"Foo Bar"`, `"true"`, etc.) and it should be
 //!   converted to the proper type.
 //!
-//! Implementing the [Attributes] trait adds support for setting the value in an straightforward,
-//! taking care of the conversions automatically. The newtype [AttributeValue] takes care of such a
+//! Implementing the [Settings] trait adds support for setting the value in an straightforward,
+//! taking care of the conversions automatically. The newtype [SettingValue] takes care of such a
 //! conversion.
 //!
 /// For plain structs, the implementation can be derived.
@@ -24,21 +24,21 @@ use std::convert::TryFrom;
 /// `UserSettings`.
 ///
 /// ```
-/// # use dinstaller_derive::DInstallerAttributes;
-/// # use dinstaller_lib::attributes::{Attributes, AttributeValue};
+/// # use dinstaller_derive::Settings;
+/// # use dinstaller_lib::settings::{Settings, SettingValue};
 ///
-/// #[derive(DInstallerAttributes)]
+/// #[derive(Settings)]
 /// struct UserSettings {
 ///   name: String,
 ///   enabled: bool
 /// }
 ///
-/// struct Settings {
+/// struct InstallSettings {
 ///   user: UserSettings
 /// }
 ///
-/// impl Attributes for Settings {
-///   fn set(&mut self, attr: &str, value: AttributeValue) -> Result<(), &'static str> {
+/// impl Settings for InstallSettings {
+///   fn set(&mut self, attr: &str, value: SettingValue) -> Result<(), &'static str> {
 ///     if let Some((ns, id)) = attr.split_once('.') {
 ///       match ns {
 ///         "user" => self.user.set(id, value)?,
@@ -50,18 +50,18 @@ use std::convert::TryFrom;
 /// }
 ///
 /// let user = UserSettings { name: "foo".to_string(), enabled: false };
-/// let mut settings = Settings { user };
-/// settings.set("user.name", AttributeValue("foo.bar".to_string()));
-/// settings.set("user.enabled", AttributeValue("true".to_string()));
+/// let mut settings = InstallSettings { user };
+/// settings.set("user.name", SettingValue("foo.bar".to_string()));
+/// settings.set("user.enabled", SettingValue("true".to_string()));
 /// assert!(&settings.user.enabled);
 /// assert_eq!(&settings.user.name, "foo.bar");
 /// ```
-pub trait Attributes {
-    fn add(&mut self, _attr: &str, _value: AttributeValue) -> Result<(), &'static str> {
+pub trait Settings {
+    fn add(&mut self, _attr: &str, _value: SettingValue) -> Result<(), &'static str> {
         Err("unknown collection")
     }
 
-    fn set(&mut self, _attr: &str, _value: AttributeValue) -> Result<(), &'static str> {
+    fn set(&mut self, _attr: &str, _value: SettingValue) -> Result<(), &'static str> {
         Err("unknown attribute")
     }
 }
@@ -72,18 +72,18 @@ pub trait Attributes {
 /// more types.
 ///
 /// ```
-///   # use dinstaller_lib::attributes::AttributeValue;
+///   # use dinstaller_lib::settings::SettingValue;
 //
-///   let value = AttributeValue("true".to_string());
+///   let value = SettingValue("true".to_string());
 ///   let value: bool = value.try_into().expect("the conversion failed");
 ///   assert_eq!(value, true);
 /// ```
-pub struct AttributeValue(pub String);
+pub struct SettingValue(pub String);
 
-impl TryFrom<AttributeValue> for bool {
+impl TryFrom<SettingValue> for bool {
     type Error = &'static str;
 
-    fn try_from(value: AttributeValue) -> Result<Self, Self::Error> {
+    fn try_from(value: SettingValue) -> Result<Self, Self::Error> {
         match value.0.to_lowercase().as_str() {
             "true" | "yes" | "t" => Ok(true),
             "false" | "no" | "f" => Ok(false),
@@ -92,10 +92,10 @@ impl TryFrom<AttributeValue> for bool {
     }
 }
 
-impl TryFrom<AttributeValue> for String {
+impl TryFrom<SettingValue> for String {
     type Error = &'static str;
 
-    fn try_from(value: AttributeValue) -> Result<Self, Self::Error> {
+    fn try_from(value: SettingValue) -> Result<Self, Self::Error> {
         Ok(value.0)
     }
 }
@@ -106,18 +106,18 @@ mod tests {
 
     #[test]
     fn test_try_from_bool() {
-        let value = AttributeValue("true".to_string());
+        let value = SettingValue("true".to_string());
         let value: bool = value.try_into().unwrap();
         assert_eq!(value, true);
 
-        let value = AttributeValue("false".to_string());
+        let value = SettingValue("false".to_string());
         let value: bool = value.try_into().unwrap();
         assert_eq!(value, false);
     }
 
     #[test]
     fn test_try_from_string() {
-        let value = AttributeValue("some value".to_string());
+        let value = SettingValue("some value".to_string());
         let value: String = value.try_into().unwrap();
         assert_eq!(value, "some value");
     }
