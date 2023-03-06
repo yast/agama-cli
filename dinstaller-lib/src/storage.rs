@@ -1,5 +1,6 @@
 use super::proxies::{CalculatorProxy, Storage1Proxy, StorageProposalProxy};
 use serde::Serialize;
+use std::collections::HashMap;
 use zbus::blocking::Connection;
 
 /// Represents a storage device
@@ -54,5 +55,25 @@ impl<'a> StorageClient<'a> {
     /// Runs the probing process
     pub fn probe(&self) -> zbus::Result<()> {
         self.storage_proxy.probe()
+    }
+
+    pub fn calculate(
+        &self,
+        candidate_devices: Vec<String>,
+        encryption_password: String,
+        lvm: bool,
+    ) -> zbus::Result<u32> {
+        let mut settings: HashMap<&str, zbus::zvariant::Value<'_>> =
+            std::collections::HashMap::new();
+        settings.insert(
+            "CandidateDevices",
+            zbus::zvariant::Value::new(candidate_devices),
+        );
+        settings.insert(
+            "EncryptionPassword",
+            zbus::zvariant::Value::new(encryption_password),
+        );
+        settings.insert("LVM", zbus::zvariant::Value::new(lvm));
+        self.calculator_proxy.calculate(settings)
     }
 }

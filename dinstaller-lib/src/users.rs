@@ -1,7 +1,7 @@
 //! Users configuration support
 
 use super::proxies::Users1Proxy;
-use crate::attributes::{AttributeValue, Attributes};
+use crate::settings::{SettingValue, Settings};
 use serde::Serialize;
 use zbus::blocking::Connection;
 
@@ -25,6 +25,7 @@ impl FirstUser {
         dbus_data: zbus::Result<(
             String,
             String,
+            String,
             bool,
             std::collections::HashMap<String, zbus::zvariant::OwnedValue>,
         )>,
@@ -33,15 +34,15 @@ impl FirstUser {
         Ok(Self {
             full_name: data.0,
             user_name: data.1,
-            autologin: data.2,
-            data: data.3,
-            password: "".to_string(),
+            password: data.2,
+            autologin: data.3,
+            data: data.4,
         })
     }
 }
 
-impl Attributes for FirstUser {
-    fn set_attribute(&mut self, attr: &str, value: AttributeValue) -> Result<(), &'static str> {
+impl Settings for FirstUser {
+    fn set(&mut self, attr: &str, value: SettingValue) -> Result<(), &'static str> {
         match attr {
             "full_name" => self.full_name = value.try_into()?,
             "user_name" => self.user_name = value.try_into()?,
