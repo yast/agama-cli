@@ -65,6 +65,13 @@ pub trait Settings {
     fn set(&mut self, _attr: &str, _value: SettingValue) -> Result<(), &'static str> {
         Err("unknown attribute")
     }
+
+    fn merge(&mut self, _other: Self)
+    where
+        Self: Sized,
+    {
+        unimplemented!()
+    }
 }
 
 /// Represents a string-based value and allows converting them to other types
