@@ -75,6 +75,7 @@ impl<'a> Store<'a> {
             settings.encryption_password.clone(),
             settings.lvm,
         )?;
+        // TODO: convert the returned value to an error
         Ok(())
     }
 }
