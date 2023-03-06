@@ -12,6 +12,7 @@
 //! taking care of the conversions automatically. The newtype [SettingValue] takes care of such a
 //! conversion.
 //!
+use std::collections::HashMap;
 /// For plain structs, the implementation can be derived.
 ///
 /// TODO: derive for top-level structs too
@@ -57,7 +58,7 @@ use std::convert::TryFrom;
 /// assert_eq!(&settings.user.name, "foo.bar");
 /// ```
 pub trait Settings {
-    fn add(&mut self, _attr: &str, _value: SettingValue) -> Result<(), &'static str> {
+    fn add(&mut self, _attr: &str, _value: SettingObject) -> Result<(), &'static str> {
         Err("unknown collection")
     }
 
@@ -78,7 +79,23 @@ pub trait Settings {
 ///   let value: bool = value.try_into().expect("the conversion failed");
 ///   assert_eq!(value, true);
 /// ```
+#[derive(Clone)]
 pub struct SettingValue(pub String);
+
+/// Represents a string-based collection and allows converting to other types
+///
+/// It wraps a hash which uses String as key and SettingValue as value.
+pub struct SettingObject(pub HashMap<String, SettingValue>);
+
+impl From<HashMap<String, String>> for SettingObject {
+    fn from(value: HashMap<String, String>) -> SettingObject {
+        let mut hash: HashMap<String, SettingValue> = HashMap::new();
+        for (k, v) in value {
+            hash.insert(k, SettingValue(v));
+        }
+        SettingObject(hash)
+    }
+}
 
 impl TryFrom<SettingValue> for bool {
     type Error = &'static str;

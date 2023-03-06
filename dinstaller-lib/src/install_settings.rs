@@ -1,9 +1,10 @@
 //! Configuration settings handling
 //!
 //! This module implements the mechanisms to load and store the installation settings.
-use crate::settings::{SettingValue, Settings};
+use crate::settings::{SettingObject, SettingValue, Settings};
 use dinstaller_derive::Settings;
 use serde::Serialize;
+use std::convert::TryFrom;
 use std::default::Default;
 
 /// Installation settings
@@ -18,7 +19,7 @@ pub struct InstallSettings {
 }
 
 impl Settings for InstallSettings {
-    fn add(&mut self, attr: &str, value: SettingValue) -> Result<(), &'static str> {
+    fn add(&mut self, attr: &str, value: SettingObject) -> Result<(), &'static str> {
         if let Some((ns, id)) = attr.split_once('.') {
             match ns {
                 "software" => self.software.add(id, value)?,
@@ -67,10 +68,28 @@ pub struct StorageSettings {
     pub encryption_password: String,
     /// Devices to use in the installation
     #[collection_setting]
-    pub devices: Vec<String>,
+    pub devices: Vec<Device>,
 }
 
-pub struct Device(String);
+/// Device to use in the installation
+#[derive(Debug, Serialize)]
+pub struct Device {
+    /// Device name (e.g., "/dev/sda")
+    name: String,
+}
+
+impl TryFrom<SettingObject> for Device {
+    type Error = &'static str;
+
+    fn try_from(value: SettingObject) -> Result<Self, Self::Error> {
+        match value.0.get("name") {
+            Some(name) => Ok(Device {
+                name: name.clone().try_into()?,
+            }),
+            None => Err("'name' key not found"),
+        }
+    }
+}
 
 /// Software settings for installation
 #[derive(Debug, Default, Settings, Serialize)]

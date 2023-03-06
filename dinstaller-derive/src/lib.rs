@@ -36,7 +36,7 @@ pub fn dinstaller_attributes_derive(input: TokenStream) -> TokenStream {
     if !collection.is_empty() {
         let field_name = collection.iter().map(|field| &field.ident);
         add_fn = quote! {
-            fn add(&mut self, attr: &str, value: SettingValue) -> Result<(), &'static str> {
+            fn add(&mut self, attr: &str, value: SettingObject) -> Result<(), &'static str> {
                 match attr {
                     #(stringify!(#field_name) => self.#field_name.push(value.try_into()?),)*
                     _ => return Err("unknown attribute")
