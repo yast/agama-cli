@@ -75,7 +75,7 @@ pub struct StorageSettings {
 #[derive(Debug, Serialize)]
 pub struct Device {
     /// Device name (e.g., "/dev/sda")
-    name: String,
+    pub name: String,
 }
 
 impl TryFrom<SettingObject> for Device {
