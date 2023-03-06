@@ -25,6 +25,7 @@ impl FirstUser {
         dbus_data: zbus::Result<(
             String,
             String,
+            String,
             bool,
             std::collections::HashMap<String, zbus::zvariant::OwnedValue>,
         )>,
@@ -33,9 +34,9 @@ impl FirstUser {
         Ok(Self {
             full_name: data.0,
             user_name: data.1,
-            autologin: data.2,
-            data: data.3,
-            password: "".to_string(),
+            password: data.2,
+            autologin: data.3,
+            data: data.4,
         })
     }
 }

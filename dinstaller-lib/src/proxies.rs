@@ -381,6 +381,7 @@ trait Users1 {
     ) -> zbus::Result<(
         String,
         String,
+        String,
         bool,
         std::collections::HashMap<String, zbus::zvariant::OwnedValue>,
     )>;
