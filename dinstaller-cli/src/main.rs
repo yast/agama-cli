@@ -3,14 +3,17 @@ use clap::Parser;
 mod commands;
 mod config;
 mod printers;
+mod profile;
 
-use commands::Commands;
-use config::run as run_config_cmd;
-use printers::Format;
-use indicatif::ProgressBar;
-use dinstaller_lib::manager::{self, ManagerClient};
 use async_std::task::{self, block_on};
+use commands::Commands;
+use dinstaller_lib::manager::ManagerClient;
+use indicatif::ProgressBar;
+use printers::Format;
 use std::time::Duration;
+
+use config::run as run_config_cmd;
+use profile::run as run_profile_cmd;
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
@@ -24,12 +27,14 @@ struct Cli {
 }
 
 async fn probe(manager: &ManagerClient<'_>) {
-    let probe = task::spawn( async {
+    let probe = task::spawn(async {
         // use new manager here
-        let another_manager = manager::ManagerClient::new(dinstaller_lib::connection().await.unwrap()).await.unwrap();
+        let another_manager = ManagerClient::new(dinstaller_lib::connection().await.unwrap())
+            .await
+            .unwrap();
         another_manager.probe().await.unwrap()
-    } );
-    block_on(show_progress(&manager) );
+    });
+    block_on(show_progress(&manager));
 
     probe.await
 }
@@ -40,11 +45,13 @@ async fn install(manager: &ManagerClient<'_>) {
         eprintln!("There are issues with configuration. Cannot install.");
         return;
     }
-    let install = task::spawn( async {
+    let install = task::spawn(async {
         // use new manager here
-        let another_manager = manager::ManagerClient::new(dinstaller_lib::connection().await.unwrap()).await.unwrap();
+        let another_manager = ManagerClient::new(dinstaller_lib::connection().await.unwrap())
+            .await
+            .unwrap();
         another_manager.install().await.unwrap()
-    } );
+    });
     block_on(show_progress(manager));
 
     install.await
@@ -68,7 +75,6 @@ async fn show_progress(client: &ManagerClient<'_>) {
 }
 
 async fn wait_for_services(manager: &ManagerClient<'_>) {
-    
     let services = manager.busy_services().await.unwrap();
     // TODO: having it optional
     if !services.is_empty() {
@@ -78,7 +84,10 @@ async fn wait_for_services(manager: &ManagerClient<'_>) {
 }
 
 fn main() {
-    let manager = block_on(manager::ManagerClient::new(block_on(dinstaller_lib::connection()).unwrap())).unwrap();
+    let manager = block_on(ManagerClient::new(
+        block_on(dinstaller_lib::connection()).unwrap(),
+    ))
+    .unwrap();
     // get all attributes to proxy, so later we can rely on signals when dbus service will be blocked
     block_on(manager.progress()).unwrap().max_steps;
     block_on(wait_for_services(&manager));
@@ -86,6 +95,7 @@ fn main() {
     match cli.command {
         Commands::Config(subcommand) => block_on(run_config_cmd(subcommand, cli.format)).unwrap(),
         Commands::Probe => block_on(probe(&manager)),
+        Commands::Profile(subcommand) => block_on(run_profile_cmd(subcommand)).unwrap(),
         Commands::Install => block_on(install(&manager)),
         _ => unimplemented!(),
     }
