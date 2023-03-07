@@ -29,12 +29,14 @@ impl<'a> Store<'a> {
 
         let settings = InstallSettings {
             storage: Default::default(),
-            software: SoftwareSettings { product },
+            software: SoftwareSettings {
+                product: Some(product),
+            },
             user: UserSettings {
-                user_name: first_user.user_name,
-                autologin: first_user.autologin,
-                full_name: first_user.full_name,
-                password: first_user.password,
+                user_name: Some(first_user.user_name),
+                autologin: Some(first_user.autologin),
+                full_name: Some(first_user.full_name),
+                password: Some(first_user.password),
             },
         };
         Ok(settings)
@@ -42,22 +44,19 @@ impl<'a> Store<'a> {
 
     /// Stores the given installation settings in the D-Bus service
     pub fn store(&self, settings: &InstallSettings) -> Result<(), Box<dyn Error>> {
-        dbg!("Storing {}", &settings);
-
         self.store_software_settings(&settings.software)?;
         self.store_user_settings(&settings.user)?;
         self.store_storage_settings(&settings.storage)?;
-
         Ok(())
     }
 
     fn store_user_settings(&self, settings: &UserSettings) -> Result<(), Box<dyn Error>> {
         // fixme: improve
         let first_user = FirstUser {
-            user_name: settings.user_name.clone(),
-            full_name: settings.full_name.clone(),
-            autologin: settings.autologin,
-            password: settings.password.clone(),
+            user_name: settings.user_name.clone().unwrap_or_default(),
+            full_name: settings.full_name.clone().unwrap_or_default(),
+            autologin: settings.autologin.unwrap_or_default(),
+            password: settings.password.clone().unwrap_or_default(),
             ..Default::default()
         };
         self.users_client.set_first_user(&first_user)?;
@@ -65,15 +64,17 @@ impl<'a> Store<'a> {
     }
 
     fn store_software_settings(&self, settings: &SoftwareSettings) -> Result<(), Box<dyn Error>> {
-        self.software_client.select_product(&settings.product)?;
+        if let Some(product) = &settings.product {
+            self.software_client.select_product(product)?;
+        }
         Ok(())
     }
 
     fn store_storage_settings(&self, settings: &StorageSettings) -> Result<(), Box<dyn Error>> {
         self.storage_client.calculate(
             settings.devices.iter().map(|d| d.name.clone()).collect(),
-            settings.encryption_password.clone(),
-            settings.lvm,
+            settings.encryption_password.clone().unwrap_or_default(),
+            settings.lvm.unwrap_or_default(),
         )?;
         // TODO: convert the returned value to an error
         Ok(())

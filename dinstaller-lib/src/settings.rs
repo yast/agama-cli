@@ -30,8 +30,8 @@ use std::convert::TryFrom;
 ///
 /// #[derive(Settings)]
 /// struct UserSettings {
-///   name: String,
-///   enabled: bool
+///   name: Option<String>,
+///   enabled: Option<bool>
 /// }
 ///
 /// struct InstallSettings {
@@ -50,12 +50,12 @@ use std::convert::TryFrom;
 ///   }
 /// }
 ///
-/// let user = UserSettings { name: "foo".to_string(), enabled: false };
+/// let user = UserSettings { name: Some(String::from("foo")), enabled: Some(false) };
 /// let mut settings = InstallSettings { user };
 /// settings.set("user.name", SettingValue("foo.bar".to_string()));
 /// settings.set("user.enabled", SettingValue("true".to_string()));
-/// assert!(&settings.user.enabled);
-/// assert_eq!(&settings.user.name, "foo.bar");
+/// assert!(&settings.user.enabled.unwrap());
+/// assert_eq!(&settings.user.name.unwrap(), "foo.bar");
 /// ```
 pub trait Settings {
     fn add(&mut self, _attr: &str, _value: SettingObject) -> Result<(), &'static str> {
@@ -64,6 +64,13 @@ pub trait Settings {
 
     fn set(&mut self, _attr: &str, _value: SettingValue) -> Result<(), &'static str> {
         Err("unknown attribute")
+    }
+
+    fn merge(&mut self, _other: Self)
+    where
+        Self: Sized,
+    {
+        unimplemented!()
     }
 }
 
@@ -109,11 +116,27 @@ impl TryFrom<SettingValue> for bool {
     }
 }
 
+impl TryFrom<SettingValue> for Option<bool> {
+    type Error = &'static str;
+
+    fn try_from(value: SettingValue) -> Result<Self, Self::Error> {
+        Ok(Some(value.try_into()?))
+    }
+}
+
 impl TryFrom<SettingValue> for String {
     type Error = &'static str;
 
     fn try_from(value: SettingValue) -> Result<Self, Self::Error> {
         Ok(value.0)
+    }
+}
+
+impl TryFrom<SettingValue> for Option<String> {
+    type Error = &'static str;
+
+    fn try_from(value: SettingValue) -> Result<Self, Self::Error> {
+        Ok(Some(value.try_into()?))
     }
 }
 
