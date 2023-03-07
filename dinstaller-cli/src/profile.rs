@@ -1,10 +1,12 @@
 use clap::Subcommand;
+use dinstaller_lib::profile;
 use std::error::Error;
+use std::path::Path;
 
 #[derive(Subcommand, Debug)]
 pub enum ProfileCommands {
     /// Download the profile from given location
-    Download,
+    Download { url: String },
 
     /// Validate a given profile
     Validate,
@@ -15,7 +17,7 @@ pub enum ProfileCommands {
 
 pub async fn run(subcommand: ProfileCommands) -> Result<(), Box<dyn Error>> {
     match subcommand {
-        ProfileCommands::Download => unimplemented!(),
+        ProfileCommands::Download { url } => profile::download(&url),
         ProfileCommands::Validate => unimplemented!(),
         ProfileCommands::Evaluate => unimplemented!(),
     }

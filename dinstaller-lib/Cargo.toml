@@ -10,3 +10,4 @@ zbus = "3.7.0"
 serde = { version = "1.0.152", features = ["derive"] }
 dinstaller-derive = { path="../dinstaller-derive" }
 async-std = "1.12.0"
+curl = "0.4.44"
