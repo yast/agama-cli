@@ -68,23 +68,6 @@ pub struct UserSettings {
     pub autologin: Option<bool>,
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_merge() {
-        let mut user1 = UserSettings::default();
-        let user2 = UserSettings {
-            full_name: Some("Jane Doe".to_owned()),
-            autologin: Some(true),
-            ..Default::default()
-        };
-        user1.merge(user2);
-        dbg!(user1);
-    }
-}
-
 /// Storage settings for installation
 #[derive(Debug, Default, Settings, Serialize, Deserialize)]
 pub struct StorageSettings {
@@ -122,4 +105,21 @@ impl TryFrom<SettingObject> for Device {
 pub struct SoftwareSettings {
     /// ID of the product to install (e.g., "ALP", "Tumbleweed", etc.)
     pub product: Option<String>,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_merge() {
+        let mut user1 = UserSettings::default();
+        let user2 = UserSettings {
+            full_name: Some("Jane Doe".to_owned()),
+            autologin: Some(true),
+            ..Default::default()
+        };
+        user1.merge(user2);
+        assert_eq!(user1.full_name.unwrap(), "Jane Doe")
+    }
 }
