@@ -1,12 +1,15 @@
+use crate::manager::ManagerClient;
 use curl::easy::Easy;
 use jsonschema::JSONSchema;
 use serde_json;
-use std::error::Error;
 use std::{
-    fs,
+    error::Error,
+    fs, io,
     io::{stdout, Write},
     path::Path,
+    process::Command,
 };
+use tempfile::tempdir;
 
 pub fn download(url: &str) -> Result<(), Box<dyn Error>> {
     let mut easy = Easy::new();
@@ -49,5 +52,34 @@ impl ProfileValidator {
             return Ok(ValidationResult::NotValid(messages));
         }
         Ok(ValidationResult::Valid)
+    }
+}
+
+pub struct ProfileEvaluator<'a> {
+    manager_client: ManagerClient<'a>,
+}
+
+impl<'a> ProfileEvaluator<'a> {
+    pub async fn new() -> Result<ProfileEvaluator<'a>, zbus::Error> {
+        let manager_client = ManagerClient::new(super::connection().await?).await?;
+        Ok(Self { manager_client })
+    }
+
+    pub async fn evaluate(&self, profile_path: &Path) -> Result<(), Box<dyn Error>> {
+        let dir = tempdir()?;
+
+        let working_path = dir.path().join("profile.jsonnet");
+        fs::copy(profile_path, working_path)?;
+
+        let hwinfo_path = dir.path().join("dinstaller.libsonnet");
+        let hwinfo = self.manager_client.hwinfo().await?;
+        fs::write(hwinfo_path, serde_json::to_string(&hwinfo)?)?;
+
+        let result = Command::new("/usr/bin/jsonnet")
+            .arg("profile.jsonnet")
+            .current_dir(&dir)
+            .output()?;
+        io::stdout().write_all(&result.stdout)?;
+        Ok(())
     }
 }

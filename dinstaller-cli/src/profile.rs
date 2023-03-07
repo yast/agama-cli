@@ -1,5 +1,5 @@
 use clap::Subcommand;
-use dinstaller_lib::profile::{download, ProfileValidator, ValidationResult};
+use dinstaller_lib::profile::{download, ProfileEvaluator, ProfileValidator, ValidationResult};
 use std::{error::Error, path::Path};
 
 #[derive(Subcommand, Debug)]
@@ -11,15 +11,7 @@ pub enum ProfileCommands {
     Validate { path: String },
 
     /// Evaluate the profile
-    Evaluate,
-}
-
-pub async fn run(subcommand: ProfileCommands) -> Result<(), Box<dyn Error>> {
-    match subcommand {
-        ProfileCommands::Download { url } => download(&url),
-        ProfileCommands::Validate { path } => validate(path),
-        ProfileCommands::Evaluate => unimplemented!(),
-    }
+    Evaluate { path: String },
 }
 
 fn validate(path: String) -> Result<(), Box<dyn Error>> {
@@ -38,4 +30,17 @@ fn validate(path: String) -> Result<(), Box<dyn Error>> {
         }
     }
     Ok(())
+}
+
+async fn evaluate(path: String) -> Result<(), Box<dyn Error>> {
+    let evaluator = ProfileEvaluator::new().await?;
+    evaluator.evaluate(Path::new(&path)).await
+}
+
+pub async fn run(subcommand: ProfileCommands) -> Result<(), Box<dyn Error>> {
+    match subcommand {
+        ProfileCommands::Download { url } => download(&url),
+        ProfileCommands::Validate { path } => validate(path),
+        ProfileCommands::Evaluate { path } => evaluate(path).await,
+    }
 }

@@ -1,3 +1,4 @@
+pub mod hwinfo;
 pub mod install_settings;
 pub mod manager;
 pub mod profile;
