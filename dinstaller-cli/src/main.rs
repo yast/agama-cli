@@ -41,7 +41,7 @@ fn main() {
     let manager = manager::ManagerClient::new(dinstaller_lib::connection().unwrap()).unwrap();
     let services = manager.busy_services().unwrap();
     if !services.is_empty() {
-        eprintln!("There are busy services {:?}. Cannot do command.", services);
+        eprintln!("There are busy services {services:?}. Cannot do command.");
         return;
     }
     let cli = Cli::parse();

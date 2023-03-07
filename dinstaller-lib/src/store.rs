@@ -55,7 +55,7 @@ impl<'a> Store<'a> {
         let first_user = FirstUser {
             user_name: settings.user_name.clone().unwrap_or_default(),
             full_name: settings.full_name.clone().unwrap_or_default(),
-            autologin: settings.autologin.clone().unwrap_or_default(),
+            autologin: settings.autologin.unwrap_or_default(),
             password: settings.password.clone().unwrap_or_default(),
             ..Default::default()
         };
@@ -65,7 +65,7 @@ impl<'a> Store<'a> {
 
     fn store_software_settings(&self, settings: &SoftwareSettings) -> Result<(), Box<dyn Error>> {
         if let Some(product) = &settings.product {
-            self.software_client.select_product(&product)?;
+            self.software_client.select_product(product)?;
         }
         Ok(())
     }
@@ -74,7 +74,7 @@ impl<'a> Store<'a> {
         self.storage_client.calculate(
             settings.devices.iter().map(|d| d.name.clone()).collect(),
             settings.encryption_password.clone().unwrap_or_default(),
-            settings.lvm.clone().unwrap_or_default(),
+            settings.lvm.unwrap_or_default(),
         )?;
         // TODO: convert the returned value to an error
         Ok(())
