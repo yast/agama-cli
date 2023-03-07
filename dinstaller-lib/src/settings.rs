@@ -116,11 +116,27 @@ impl TryFrom<SettingValue> for bool {
     }
 }
 
+impl TryFrom<SettingValue> for Option<bool> {
+    type Error = &'static str;
+
+    fn try_from(value: SettingValue) -> Result<Self, Self::Error> {
+        Ok(Some(value.try_into()?))
+    }
+}
+
 impl TryFrom<SettingValue> for String {
     type Error = &'static str;
 
     fn try_from(value: SettingValue) -> Result<Self, Self::Error> {
         Ok(value.0)
+    }
+}
+
+impl TryFrom<SettingValue> for Option<String> {
+    type Error = &'static str;
+
+    fn try_from(value: SettingValue) -> Result<Self, Self::Error> {
+        Ok(Some(value.try_into()?))
     }
 }
 

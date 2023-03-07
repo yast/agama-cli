@@ -63,8 +63,7 @@ impl<'a> StorageClient<'a> {
         encryption_password: String,
         lvm: bool,
     ) -> zbus::Result<u32> {
-        let mut settings: HashMap<&str, zbus::zvariant::Value<'_>> =
-            std::collections::HashMap::new();
+        let mut settings: HashMap<&str, zbus::zvariant::Value<'_>> = HashMap::new();
         settings.insert(
             "CandidateDevices",
             zbus::zvariant::Value::new(candidate_devices),

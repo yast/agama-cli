@@ -3,7 +3,7 @@
 //! This module implements the mechanisms to load and store the installation settings.
 use crate::settings::{SettingObject, SettingValue, Settings};
 use dinstaller_derive::Settings;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::convert::TryFrom;
 use std::default::Default;
 
@@ -11,10 +11,13 @@ use std::default::Default;
 ///
 /// This struct represents installation settings. It serves as an entry point and it is composed of
 /// other structs which hold the settings for each area ("users", "software", etc.).
-#[derive(Debug, Default, Serialize)]
+#[derive(Debug, Default, Serialize, Deserialize)]
 pub struct InstallSettings {
+    #[serde(default)]
     pub user: UserSettings,
+    #[serde(default)]
     pub software: SoftwareSettings,
+    #[serde(default)]
     pub storage: StorageSettings,
 }
 
@@ -42,37 +45,60 @@ impl Settings for InstallSettings {
         }
         Ok(())
     }
+
+    fn merge(&mut self, other: Self) {
+        self.software.merge(other.software);
+        self.user.merge(other.user);
+        self.storage.merge(other.storage);
+    }
 }
 
 /// User settings
 ///
 /// Holds the user settings for the installation.
-#[derive(Debug, Default, Settings, Serialize)]
+#[derive(Debug, Default, Settings, Serialize, Deserialize)]
 pub struct UserSettings {
     /// First user's full name
-    pub full_name: String,
+    pub full_name: Option<String>,
     /// First user's username
-    pub user_name: String,
+    pub user_name: Option<String>,
     /// First user's password (in clear text)
-    pub password: String,
+    pub password: Option<String>,
     /// Whether auto-login should enabled or not
-    pub autologin: bool,
+    pub autologin: Option<bool>,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_merge() {
+        let mut user1 = UserSettings::default();
+        let user2 = UserSettings {
+            full_name: Some("Jane Doe".to_owned()),
+            autologin: Some(true),
+            ..Default::default()
+        };
+        user1.merge(user2);
+        dbg!(user1);
+    }
 }
 
 /// Storage settings for installation
-#[derive(Debug, Default, Settings, Serialize)]
+#[derive(Debug, Default, Settings, Serialize, Deserialize)]
 pub struct StorageSettings {
     /// Whether LVM should be enabled
-    pub lvm: bool,
+    pub lvm: Option<bool>,
     /// Encryption password for the storage devices (in clear text)
-    pub encryption_password: String,
+    pub encryption_password: Option<String>,
     /// Devices to use in the installation
     #[collection_setting]
     pub devices: Vec<Device>,
 }
 
 /// Device to use in the installation
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Device {
     /// Device name (e.g., "/dev/sda")
     pub name: String,
@@ -92,8 +118,8 @@ impl TryFrom<SettingObject> for Device {
 }
 
 /// Software settings for installation
-#[derive(Debug, Default, Settings, Serialize)]
+#[derive(Debug, Default, Settings, Serialize, Deserialize)]
 pub struct SoftwareSettings {
     /// ID of the product to install (e.g., "ALP", "Tumbleweed", etc.)
-    pub product: String,
+    pub product: Option<String>,
 }

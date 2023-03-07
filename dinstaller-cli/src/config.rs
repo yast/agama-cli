@@ -1,5 +1,6 @@
 use crate::printers::{print, Format};
 use clap::Subcommand;
+use dinstaller_lib::install_settings::InstallSettings;
 use dinstaller_lib::settings::{SettingObject, SettingValue, Settings};
 use dinstaller_lib::Store as SettingsStore;
 use std::{collections::HashMap, error::Error, io};
@@ -15,12 +16,15 @@ pub enum ConfigCommands {
     },
     /// Shows the value of one or many configuration settings
     Show,
+    /// Loads the configuration from a JSON file
+    Load { path: String },
 }
 
 pub enum ConfigAction {
     Add(String, HashMap<String, String>),
     Set(HashMap<String, String>),
     Show,
+    Load(String),
 }
 
 pub fn run(subcommand: ConfigCommands, format: Option<Format>) -> Result<(), Box<dyn Error>> {
@@ -42,6 +46,12 @@ pub fn run(subcommand: ConfigCommands, format: Option<Format>) -> Result<(), Box
             model.add(&key, SettingObject::from(values))?;
             store.store(&model)
         }
+        ConfigAction::Load(path) => {
+            let contents = std::fs::read_to_string(path)?;
+            let result: InstallSettings = serde_json::from_str(&contents).unwrap();
+            model.merge(result);
+            store.store(&model)
+        }
     }
 }
 
@@ -50,6 +60,7 @@ fn parse_config_command(subcommand: ConfigCommands) -> ConfigAction {
         ConfigCommands::Add { key, values } => ConfigAction::Add(key, parse_keys_values(values)),
         ConfigCommands::Show => ConfigAction::Show,
         ConfigCommands::Set { values } => ConfigAction::Set(parse_keys_values(values)),
+        ConfigCommands::Load { path } => ConfigAction::Load(path),
     }
 }
 
