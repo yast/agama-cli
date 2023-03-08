@@ -11,6 +11,11 @@ use std::{
 };
 use tempfile::tempdir;
 
+/// Downloads a file a writes it to the stdout()
+///
+/// TODO: move this code to a struct
+/// TODO: add support for YaST-specific URLs
+/// TODO: do not write to stdout, but to something implementing the Write trait
 pub fn download(url: &str) -> Result<(), Box<dyn Error>> {
     let mut easy = Easy::new();
     easy.url(url)?;
@@ -85,6 +90,11 @@ impl ProfileValidator {
     }
 }
 
+/// Evaluates a profile
+///
+/// Evaluating a profile means injecting the hardware information (coming from D-Bus)
+/// and running the jsonnet code to generate a plain JSON file. For this struct to
+/// work, the `/usr/bin/jsonnet` command must be available.
 pub struct ProfileEvaluator<'a> {
     manager_client: ManagerClient<'a>,
 }
