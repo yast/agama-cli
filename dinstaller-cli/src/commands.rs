@@ -13,5 +13,7 @@ pub enum Commands {
         keys: Vec<String>,
     },
     /// Start probing
-    Probe
+    Probe,
+    // Start Installation
+    Install
 }

@@ -24,6 +24,21 @@ struct Cli {
 fn probe() {
     let client = manager::ManagerClient::new(dinstaller_lib::connection().unwrap()).unwrap();
     client.probe().unwrap();
+    show_progress(client)
+}
+
+fn install() {
+    let client = manager::ManagerClient::new(dinstaller_lib::connection().unwrap()).unwrap();
+    if !client.can_install().unwrap() {
+        // TODO: add some hints what is wrong or add dedicated command for it?
+        eprintln!("There are issues with configuration. Cannot install.");
+        return;
+    }
+    client.install().unwrap();
+    show_progress(client)    
+}
+
+fn show_progress(client: manager::ManagerClient) {
     let mut progress = client.progress().unwrap();
     let pb = ProgressBar::new(progress.max_steps.into());
     loop {
@@ -48,6 +63,7 @@ fn main() {
     match cli.command {
         Commands::Config(subcommand) => run_config_cmd(subcommand, cli.format).unwrap(),
         Commands::Probe => probe(),
+        Commands::Install => install(),
         _ => unimplemented!(),
     }
 }
