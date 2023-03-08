@@ -4,13 +4,13 @@ use std::{error::Error, path::Path};
 
 #[derive(Subcommand, Debug)]
 pub enum ProfileCommands {
-    /// Download the profile from given location
+    /// Download the profile from a given location
     Download { url: String },
 
-    /// Validate a given profile
+    /// Validate a profile using JSON Schema
     Validate { path: String },
 
-    /// Evaluate the profile
+    /// Evaluate a profile, injecting the hardware information from D-Bus
     Evaluate { path: String },
 }
 
