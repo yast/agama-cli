@@ -25,6 +25,14 @@ impl<'a> ManagerClient<'a> {
         self.manager_proxy.probe()
     }
 
+    pub fn install(&self) -> zbus::Result<()> {
+        self.manager_proxy.commit()
+    }
+
+    pub fn can_install(&self) -> zbus::Result<bool> {
+        self.manager_proxy.can_install()
+    }
+
     pub fn progress(&self) -> zbus::Result<Progress> {
         Progress::from_proxy(&self.progress_proxy)
     }
