@@ -16,6 +16,7 @@ use tempfile::tempdir;
 /// TODO: move this code to a struct
 /// TODO: add support for YaST-specific URLs
 /// TODO: do not write to stdout, but to something implementing the Write trait
+/// TODO: retry the download if it fails
 pub fn download(url: &str) -> Result<(), Box<dyn Error>> {
     let mut easy = Easy::new();
     easy.url(url)?;
