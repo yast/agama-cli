@@ -14,10 +14,7 @@
           "description": "Product identifier",
           "type": "string"
         }
-      },
-      "required": [
-        "product"
-      ]
+      }
     },
     "user": {
       "description": "User settings",
