@@ -1,0 +1,31 @@
+{
+   "localization": {
+      "keyboard": "en_US",
+      "language": "en_US"
+   },
+   "scripts": [
+      {
+         "type": "post",
+         "url": "https://myscript.org/test.sh"
+      },
+      {
+         "source": "#!/bin/bash\n\necho hello\n",
+         "type": "pre"
+      }
+   ],
+   "software": {
+      "product": "ALP"
+   },
+   "storage": {
+      "devices": [
+         {
+            "name": "/dev/dm-1"
+         }
+      ]
+   },
+   "user": {
+      "fullName": "Jane Doe",
+      "password": "123456",
+      "userName": "jane.doe"
+   }
+}

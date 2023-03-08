@@ -22,11 +22,31 @@ pub fn download(url: &str) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
+#[derive(Debug)]
 pub enum ValidationResult {
     Valid,
     NotValid(Vec<String>),
 }
 
+/// Checks whether an autoinstallation profile is valid
+///
+/// ```
+/// # use dinstaller_lib::profile::{ProfileValidator, ValidationResult};
+/// # use std::path::Path;
+/// let validator = ProfileValidator::default_schema()
+///   .expect("the default validtor");
+///
+/// // you can validate a &str
+/// let wrong_profile = r#"
+///   { "product": { "name": "Tumbleweed" } }
+/// "#;
+/// let result = validator.validate_str(&wrong_profile).unwrap();
+/// assert!(matches!(ValidationResult::NotValid, result));
+///
+/// // or a file
+/// validator.validate_file(Path::new("share/examples/profile.json"));
+/// assert!(matches!(ValidationResult::Valid, result));
+/// ```
 pub struct ProfileValidator {
     schema: JSONSchema,
 }
@@ -49,10 +69,14 @@ impl ProfileValidator {
         Ok(Self { schema })
     }
 
-    pub fn validate(&self, profile_path: &Path) -> Result<ValidationResult, Box<dyn Error>> {
+    pub fn validate_file(&self, profile_path: &Path) -> Result<ValidationResult, Box<dyn Error>> {
         let contents = fs::read_to_string(profile_path)?;
-        let profile = serde_json::from_str(&contents)?;
-        let result = self.schema.validate(&profile);
+        self.validate_str(&contents)
+    }
+
+    pub fn validate_str(&self, profile: &str) -> Result<ValidationResult, Box<dyn Error>> {
+        let contents = serde_json::from_str(&profile)?;
+        let result = self.schema.validate(&contents);
         if let Err(errors) = result {
             let messages: Vec<String> = errors.map(|e| format!("{e}")).collect();
             return Ok(ValidationResult::NotValid(messages));

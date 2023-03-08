@@ -17,7 +17,7 @@ pub enum ProfileCommands {
 fn validate(path: String) -> Result<(), Box<dyn Error>> {
     let validator = ProfileValidator::default_schema()?;
     let path = Path::new(&path);
-    let result = validator.validate(path)?;
+    let result = validator.validate_file(path)?;
     match result {
         ValidationResult::Valid => {
             println!("The profile is valid")
