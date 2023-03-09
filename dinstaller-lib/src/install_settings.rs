@@ -46,10 +46,10 @@ impl Settings for InstallSettings {
         Ok(())
     }
 
-    fn merge(&mut self, other: Self) {
-        self.software.merge(other.software);
-        self.user.merge(other.user);
-        self.storage.merge(other.storage);
+    fn merge(&mut self, other: &Self) {
+        self.software.merge(&other.software);
+        self.user.merge(&other.user);
+        self.storage.merge(&other.storage);
     }
 }
 
@@ -119,7 +119,7 @@ mod tests {
             autologin: Some(true),
             ..Default::default()
         };
-        user1.merge(user2);
+        user1.merge(&user2);
         assert_eq!(user1.full_name.unwrap(), "Jane Doe")
     }
 }
