@@ -12,12 +12,12 @@ pub use store::Store;
 
 use std::path::Path;
 
-pub fn connection() -> Result<zbus::blocking::Connection, zbus::Error> {
+pub async fn connection() -> Result<zbus::Connection, zbus::Error> {
     let path = if Path::new("/run/d-installer/bus").exists() {
         "/run/d-installer/bus"
     } else {
         "/run/dbus/system_bus_socket"
     };
     let address = format!("unix:path={path}");
-    zbus::blocking::ConnectionBuilder::address(address.as_str())?.build()
+    zbus::ConnectionBuilder::address(address.as_str())?.build().await
 }

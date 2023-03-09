@@ -4,7 +4,7 @@ use super::proxies::Users1Proxy;
 use crate::install_settings::UserSettings;
 use crate::settings::{SettingValue, Settings};
 use serde::Serialize;
-use zbus::blocking::Connection;
+use zbus::Connection;
 
 /// Represents the settings for the first user
 #[derive(Serialize, Debug, Default)]
@@ -71,35 +71,35 @@ pub struct UsersClient<'a> {
 }
 
 impl<'a> UsersClient<'a> {
-    pub fn new(connection: Connection) -> zbus::Result<Self> {
+    pub async fn new(connection: Connection) -> zbus::Result<UsersClient<'a>> {
         Ok(Self {
-            users_proxy: Users1Proxy::new(&connection)?,
+            users_proxy: Users1Proxy::new(&connection).await?,
         })
     }
 
     /// Returns the settings for first non admin user
-    pub fn first_user(&self) -> zbus::Result<FirstUser> {
-        FirstUser::from_dbus(self.users_proxy.first_user())
+    pub async fn first_user(&self) -> zbus::Result<FirstUser> {
+        FirstUser::from_dbus(self.users_proxy.first_user().await)
     }
 
     /// Whether the root password is set or not
-    pub fn is_root_password(&self) -> zbus::Result<bool> {
-        self.users_proxy.root_password_set()
+    pub async fn is_root_password(&self) -> zbus::Result<bool> {
+        self.users_proxy.root_password_set().await
     }
 
     /// Returns the SSH key for the root user
-    pub fn root_ssh_key(&self) -> zbus::Result<String> {
-        self.users_proxy.root_sshkey()
+    pub async fn root_ssh_key(&self) -> zbus::Result<String> {
+        self.users_proxy.root_sshkey().await
     }
 
     /// Set the configuration for the first user
-    pub fn set_first_user(&self, first_user: &FirstUser) -> zbus::Result<(bool, Vec<String>)> {
+    pub async fn set_first_user(&self, first_user: &FirstUser) -> zbus::Result<(bool, Vec<String>)> {
         self.users_proxy.set_first_user(
             &first_user.full_name,
             &first_user.user_name,
             &first_user.password,
             first_user.autologin,
             std::collections::HashMap::new(),
-        )
+        ).await
     }
 }

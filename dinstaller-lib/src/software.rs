@@ -1,6 +1,6 @@
 use super::proxies::Software1Proxy;
 use serde::Serialize;
-use zbus::blocking::Connection;
+use zbus::Connection;
 
 /// Represents a software product
 #[derive(Debug, Serialize)]
@@ -19,17 +19,17 @@ pub struct SoftwareClient<'a> {
 }
 
 impl<'a> SoftwareClient<'a> {
-    pub fn new(connection: Connection) -> zbus::Result<Self> {
+    pub async fn new(connection: Connection) -> zbus::Result<SoftwareClient<'a>> {
         Ok(Self {
-            software_proxy: Software1Proxy::new(&connection)?,
+            software_proxy: Software1Proxy::new(&connection).await?,
         })
     }
 
     /// Returns the available products
-    pub fn products(&self) -> zbus::Result<Vec<Product>> {
+    pub async fn products(&self) -> zbus::Result<Vec<Product>> {
         let products: Vec<Product> = self
             .software_proxy
-            .available_base_products()?
+            .available_base_products().await?
             .into_iter()
             .map(|(id, name, data)| {
                 let description = match data.get("description") {
@@ -47,12 +47,12 @@ impl<'a> SoftwareClient<'a> {
     }
 
     /// Returns the selected product to install
-    pub fn product(&self) -> zbus::Result<String> {
-        self.software_proxy.selected_base_product()
+    pub async fn product(&self) -> zbus::Result<String> {
+        self.software_proxy.selected_base_product().await
     }
 
     /// Selects the product to install
-    pub fn select_product(&self, product_id: &str) -> zbus::Result<()> {
-        self.software_proxy.select_product(product_id)
+    pub async fn select_product(&self, product_id: &str) -> zbus::Result<()> {
+        self.software_proxy.select_product(product_id).await
     }
 }

@@ -8,7 +8,9 @@ use commands::Commands;
 use config::run as run_config_cmd;
 use printers::Format;
 use indicatif::ProgressBar;
-use dinstaller_lib::manager;
+use dinstaller_lib::manager::{self, ManagerClient};
+use async_std::task::{self, block_on};
+use std::time::Duration;
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
@@ -21,25 +23,38 @@ struct Cli {
     pub format: Option<Format>,
 }
 
-fn probe() {
-    let client = manager::ManagerClient::new(dinstaller_lib::connection().unwrap()).unwrap();
-    client.probe().unwrap();
-    show_progress(client)
+async fn probe(manager: &ManagerClient<'_>) {
+    let probe = task::spawn( async {
+        // use new manager here
+        let another_manager = manager::ManagerClient::new(dinstaller_lib::connection().await.unwrap()).await.unwrap();
+        another_manager.probe().await.unwrap()
+    } );
+    block_on(show_progress(&manager) );
+
+    probe.await
 }
 
-fn install() {
-    let client = manager::ManagerClient::new(dinstaller_lib::connection().unwrap()).unwrap();
-    if !client.can_install().unwrap() {
+async fn install(manager: &ManagerClient<'_>) {
+    if !manager.can_install().await.unwrap() {
         // TODO: add some hints what is wrong or add dedicated command for it?
         eprintln!("There are issues with configuration. Cannot install.");
         return;
     }
-    client.install().unwrap();
-    show_progress(client)    
+    let install = task::spawn( async {
+        // use new manager here
+        let another_manager = manager::ManagerClient::new(dinstaller_lib::connection().await.unwrap()).await.unwrap();
+        another_manager.install().await.unwrap()
+    } );
+    block_on(show_progress(manager));
+
+    install.await
 }
 
-fn show_progress(client: manager::ManagerClient) {
-    let mut progress = client.progress().unwrap();
+async fn show_progress(client: &ManagerClient<'_>) {
+    // wait 1 second to give other task chance to start, so progress can display something
+    task::sleep(Duration::from_secs(1)).await;
+    let mut progress = client.progress().await.unwrap();
+    eprintln!("Showing progress with max steps {:?}", progress.max_steps);
     let pb = ProgressBar::new(progress.max_steps.into());
     loop {
         if progress.finished {
@@ -48,22 +63,30 @@ fn show_progress(client: manager::ManagerClient) {
         }
         pb.set_position(progress.current_step.into()); // TODO: display also title somewhere
         std::thread::sleep(std::time::Duration::from_secs(1));
-        progress = client.progress().unwrap();
+        progress = client.progress().await.unwrap();
+    }
+}
+
+async fn wait_for_services(manager: &ManagerClient<'_>) {
+    
+    let services = manager.busy_services().await.unwrap();
+    // TODO: having it optional
+    if !services.is_empty() {
+        eprintln!("There are busy services {services:?}. Waiting for them.");
+        show_progress(manager).await
     }
 }
 
 fn main() {
-    let manager = manager::ManagerClient::new(dinstaller_lib::connection().unwrap()).unwrap();
-    let services = manager.busy_services().unwrap();
-    if !services.is_empty() {
-        eprintln!("There are busy services {services:?}. Cannot do command.");
-        return;
-    }
+    let manager = block_on(manager::ManagerClient::new(block_on(dinstaller_lib::connection()).unwrap())).unwrap();
+    // get all attributes to proxy, so later we can rely on signals when dbus service will be blocked
+    block_on(manager.progress()).unwrap().max_steps;
+    block_on(wait_for_services(&manager));
     let cli = Cli::parse();
     match cli.command {
-        Commands::Config(subcommand) => run_config_cmd(subcommand, cli.format).unwrap(),
-        Commands::Probe => probe(),
-        Commands::Install => install(),
+        Commands::Config(subcommand) => block_on(run_config_cmd(subcommand, cli.format)).unwrap(),
+        Commands::Probe => block_on(probe(&manager)),
+        Commands::Install => block_on(install(&manager)),
         _ => unimplemented!(),
     }
 }

@@ -1,3 +1,5 @@
+use zbus::export::futures_util::future::try_join;
+
 use crate::install_settings::{InstallSettings, SoftwareSettings, StorageSettings, UserSettings};
 use crate::software::SoftwareClient;
 use crate::storage::StorageClient;
@@ -14,18 +16,20 @@ pub struct Store<'a> {
 }
 
 impl<'a> Store<'a> {
-    pub fn new() -> Result<Self, zbus::Error> {
+    pub async fn new() -> Result<Store<'a>, zbus::Error> {
         Ok(Self {
-            users_client: UsersClient::new(super::connection()?)?,
-            software_client: SoftwareClient::new(super::connection()?)?,
-            storage_client: StorageClient::new(super::connection()?)?,
+            users_client: UsersClient::new(super::connection().await?).await?,
+            software_client: SoftwareClient::new(super::connection().await?).await?,
+            storage_client: StorageClient::new(super::connection().await?).await?,
         })
     }
 
     /// Loads the installation settings from the D-Bus service
-    pub fn load(&self) -> Result<InstallSettings, Box<dyn Error>> {
-        let first_user = self.users_client.first_user()?;
-        let product = self.software_client.product()?;
+    pub async fn load(&self) -> Result<InstallSettings, Box<dyn Error>> {
+        let (first_user, product) = try_join(
+            self.users_client.first_user(),
+            self.software_client.product()
+        ).await?;
 
         let settings = InstallSettings {
             storage: Default::default(),
@@ -43,14 +47,16 @@ impl<'a> Store<'a> {
     }
 
     /// Stores the given installation settings in the D-Bus service
-    pub fn store(&self, settings: &InstallSettings) -> Result<(), Box<dyn Error>> {
-        self.store_software_settings(&settings.software)?;
-        self.store_user_settings(&settings.user)?;
-        self.store_storage_settings(&settings.storage)?;
+    pub async fn store(&self, settings: &InstallSettings) -> Result<(), Box<dyn Error>> {
+        // be on safe side for storing settings here, but probably user and storage can be
+        // parallel. With software product can be issue
+        self.store_software_settings(&settings.software).await?;
+        self.store_user_settings(&settings.user).await?;
+        self.store_storage_settings(&settings.storage).await?;
         Ok(())
     }
 
-    fn store_user_settings(&self, settings: &UserSettings) -> Result<(), Box<dyn Error>> {
+    async fn store_user_settings(&self, settings: &UserSettings) -> Result<(), Box<dyn Error>> {
         // fixme: improve
         let first_user = FirstUser {
             user_name: settings.user_name.clone().unwrap_or_default(),
@@ -59,23 +65,23 @@ impl<'a> Store<'a> {
             password: settings.password.clone().unwrap_or_default(),
             ..Default::default()
         };
-        self.users_client.set_first_user(&first_user)?;
+        self.users_client.set_first_user(&first_user).await?;
         Ok(())
     }
 
-    fn store_software_settings(&self, settings: &SoftwareSettings) -> Result<(), Box<dyn Error>> {
+    async fn store_software_settings(&self, settings: &SoftwareSettings) -> Result<(), Box<dyn Error>> {
         if let Some(product) = &settings.product {
-            self.software_client.select_product(product)?;
+            self.software_client.select_product(product).await?;
         }
         Ok(())
     }
 
-    fn store_storage_settings(&self, settings: &StorageSettings) -> Result<(), Box<dyn Error>> {
+    async fn store_storage_settings(&self, settings: &StorageSettings) -> Result<(), Box<dyn Error>> {
         self.storage_client.calculate(
             settings.devices.iter().map(|d| d.name.clone()).collect(),
             settings.encryption_password.clone().unwrap_or_default(),
             settings.lvm.unwrap_or_default(),
-        )?;
+        ).await?;
         // TODO: convert the returned value to an error
         Ok(())
     }

@@ -27,16 +27,16 @@ pub enum ConfigAction {
     Load(String),
 }
 
-pub fn run(subcommand: ConfigCommands, format: Option<Format>) -> Result<(), Box<dyn Error>> {
-    let store = SettingsStore::new()?;
-    let mut model = store.load()?;
+pub async fn run(subcommand: ConfigCommands, format: Option<Format>) -> Result<(), Box<dyn Error>> {
+    let store = SettingsStore::new().await?;
+    let mut model = store.load().await?;
 
     match parse_config_command(subcommand) {
         ConfigAction::Set(changes) => {
             for (key, value) in changes {
                 model.set(&key, SettingValue(value))?;
             }
-            store.store(&model)
+            store.store(&model).await
         }
         ConfigAction::Show => {
             print(model, io::stdout(), format)?;
@@ -44,13 +44,13 @@ pub fn run(subcommand: ConfigCommands, format: Option<Format>) -> Result<(), Box
         }
         ConfigAction::Add(key, values) => {
             model.add(&key, SettingObject::from(values))?;
-            store.store(&model)
+            store.store(&model).await
         }
         ConfigAction::Load(path) => {
             let contents = std::fs::read_to_string(path)?;
             let result: InstallSettings = serde_json::from_str(&contents).unwrap();
             model.merge(result);
-            store.store(&model)
+            store.store(&model).await
         }
     }
 }
