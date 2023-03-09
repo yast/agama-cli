@@ -8,31 +8,76 @@ use std::convert::TryFrom;
 use std::default::Default;
 use std::str::FromStr;
 
-#[derive(PartialEq)]
-pub enum Section {
+/// Settings scopes
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum Scope {
+    /// User settings
     Users,
+    /// Software settings
     Software,
+    /// Storage settings
     Storage,
 }
 
-impl Section {
+impl Scope {
+    /// Returns known scopes
+    ///
     // TODO: we can rely on strum so we do not forget to add them
-    pub fn all() -> Vec<Section> {
-        vec![Section::Software, Section::Storage, Section::Users]
+    pub fn all() -> Vec<Self> {
+        vec![Scope::Software, Scope::Storage, Scope::Users]
     }
 }
 
-impl FromStr for Section {
+impl FromStr for Scope {
     type Err = &'static str;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        println!("{}", &s);
         match s {
             "users" => Ok(Self::Users),
             "software" => Ok(Self::Software),
             "storage" => Ok(Self::Storage),
             _ => Err("Unknown section"),
         }
+    }
+}
+
+impl ToString for Scope {
+    fn to_string(&self) -> String {
+        match self {
+            Scope::Users => String::from("user"),
+            Scope::Software => String::from("software"),
+            Scope::Storage => String::from("storage"),
+        }
+    }
+}
+
+pub struct Key(Scope, String);
+
+impl Key {
+    pub fn scope(&self) -> Scope {
+        self.0
+    }
+
+    pub fn path(&self) -> &str {
+        &self.1
+    }
+}
+
+impl ToString for Key {
+    fn to_string(&self) -> String {
+        format!("{}.{}", self.scope().to_string(), &self.path())
+    }
+}
+
+impl FromStr for Key {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if let Some((scope_name, path)) = s.split_once('.') {
+            let scope = Scope::from_str(scope_name)?;
+            return Ok(Key(scope, path.to_string()));
+        }
+        Err("not a valid key")
     }
 }
 
@@ -48,6 +93,24 @@ pub struct InstallSettings {
     pub software: Option<SoftwareSettings>,
     #[serde(default)]
     pub storage: Option<StorageSettings>,
+}
+
+impl InstallSettings {
+    pub fn defined_scopes(&self) -> Vec<Scope> {
+        let mut scopes = vec![];
+        if self.user.is_some() {
+            scopes.push(Scope::Users);
+        }
+
+        if self.storage.is_some() {
+            scopes.push(Scope::Storage);
+        }
+
+        if self.software.is_some() {
+            scopes.push(Scope::Software);
+        }
+        scopes
+    }
 }
 
 impl Settings for InstallSettings {

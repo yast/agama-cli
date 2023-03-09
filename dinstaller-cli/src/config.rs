@@ -1,8 +1,9 @@
 use crate::printers::{print, Format};
 use clap::Subcommand;
-use dinstaller_lib::install_settings::InstallSettings;
+use dinstaller_lib::install_settings::{InstallSettings, Key};
 use dinstaller_lib::settings::{SettingObject, SettingValue, Settings};
 use dinstaller_lib::Store as SettingsStore;
+use std::str::FromStr;
 use std::{collections::HashMap, error::Error, io};
 
 #[derive(Subcommand, Debug)]
@@ -29,27 +30,38 @@ pub enum ConfigAction {
 
 pub fn run(subcommand: ConfigCommands, format: Option<Format>) -> Result<(), Box<dyn Error>> {
     let store = SettingsStore::new()?;
-    let mut model = store.load()?;
 
     match parse_config_command(subcommand) {
         ConfigAction::Set(changes) => {
+            let scopes = changes
+                .keys()
+                .map(|k| Key::from_str(k).unwrap())
+                .map(|i| i.scope())
+                .collect();
+            let mut model = store.load(Some(scopes))?;
             for (key, value) in changes {
                 model.set(&key, SettingValue(value))?;
             }
             store.store(&model)
         }
         ConfigAction::Show => {
+            let model = store.load(None)?;
             print(model, io::stdout(), format)?;
             Ok(())
         }
         ConfigAction::Add(key, values) => {
-            model.add(&key, SettingObject::from(values))?;
+            let key = Key::from_str(&key)?;
+            let mut model = store.load(Some(vec![key.scope()]))?;
+            model.add(&key.to_string(), SettingObject::from(values))?;
             store.store(&model)
         }
         ConfigAction::Load(path) => {
             let contents = std::fs::read_to_string(path)?;
             let result: InstallSettings = serde_json::from_str(&contents).unwrap();
-            model.merge(result);
+            let scopes = result.defined_scopes();
+            dbg!(&scopes);
+            let mut model = store.load(Some(scopes))?;
+            model.merge(&result);
             store.store(&model)
         }
     }

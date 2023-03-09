@@ -2,7 +2,7 @@ mod software;
 mod storage;
 mod users;
 
-use crate::install_settings::{InstallSettings, Section};
+use crate::install_settings::{InstallSettings, Scope};
 use crate::store::software::SoftwareStore;
 use crate::store::storage::StorageStore;
 use crate::store::users::UsersStore;
@@ -27,22 +27,22 @@ impl<'a> Store<'a> {
     }
 
     /// Loads the installation settings from the D-Bus service
-    pub fn load(&self, only: Option<Vec<Section>>) -> Result<InstallSettings, Box<dyn Error>> {
-        let sections = match only {
-            Some(sections) => sections,
-            None => Section::all(),
+    pub fn load(&self, only: Option<Vec<Scope>>) -> Result<InstallSettings, Box<dyn Error>> {
+        let scopes = match only {
+            Some(scopes) => scopes,
+            None => Scope::all(),
         };
 
         let mut settings: InstallSettings = Default::default();
-        if sections.contains(&Section::Storage) {
+        if scopes.contains(&Scope::Storage) {
             settings.storage = Some(self.storage.load()?);
         }
 
-        if sections.contains(&Section::Software) {
+        if scopes.contains(&Scope::Software) {
             settings.software = Some(self.software.load()?);
         }
 
-        if sections.contains(&Section::Users) {
+        if scopes.contains(&Scope::Users) {
             settings.user = Some(self.users.load()?);
         }
         Ok(settings)
@@ -51,13 +51,13 @@ impl<'a> Store<'a> {
     /// Stores the given installation settings in the D-Bus service
     pub fn store(&self, settings: &InstallSettings) -> Result<(), Box<dyn Error>> {
         if let Some(software) = &settings.software {
-            self.software.store(&software)?;
+            self.software.store(software)?;
         }
         if let Some(user) = &settings.user {
-            self.users.store(&user)?;
+            self.users.store(user)?;
         }
         if let Some(storage) = &settings.storage {
-            self.storage.store(&storage)?;
+            self.storage.store(storage)?;
         }
         Ok(())
     }
