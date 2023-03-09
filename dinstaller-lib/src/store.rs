@@ -2,7 +2,7 @@ mod software;
 mod storage;
 mod users;
 
-use crate::install_settings::InstallSettings;
+use crate::install_settings::{InstallSettings, Section};
 use crate::store::software::SoftwareStore;
 use crate::store::storage::StorageStore;
 use crate::store::users::UsersStore;
@@ -27,20 +27,38 @@ impl<'a> Store<'a> {
     }
 
     /// Loads the installation settings from the D-Bus service
-    pub fn load(&self) -> Result<InstallSettings, Box<dyn Error>> {
-        let settings = InstallSettings {
-            storage: self.storage.load()?,
-            software: self.software.load()?,
-            user: self.users.load()?,
+    pub fn load(&self, only: Option<Vec<Section>>) -> Result<InstallSettings, Box<dyn Error>> {
+        let sections = match only {
+            Some(sections) => sections,
+            None => Section::all(),
         };
+
+        let mut settings: InstallSettings = Default::default();
+        if sections.contains(&Section::Storage) {
+            settings.storage = Some(self.storage.load()?);
+        }
+
+        if sections.contains(&Section::Software) {
+            settings.software = Some(self.software.load()?);
+        }
+
+        if sections.contains(&Section::Users) {
+            settings.user = Some(self.users.load()?);
+        }
         Ok(settings)
     }
 
     /// Stores the given installation settings in the D-Bus service
     pub fn store(&self, settings: &InstallSettings) -> Result<(), Box<dyn Error>> {
-        self.software.store(&settings.software)?;
-        self.users.store(&settings.user)?;
-        self.storage.store(&settings.storage)?;
+        if let Some(software) = &settings.software {
+            self.software.store(&software)?;
+        }
+        if let Some(user) = &settings.user {
+            self.users.store(&user)?;
+        }
+        if let Some(storage) = &settings.storage {
+            self.storage.store(&storage)?;
+        }
         Ok(())
     }
 }

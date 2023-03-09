@@ -6,6 +6,35 @@ use dinstaller_derive::Settings;
 use serde::{Deserialize, Serialize};
 use std::convert::TryFrom;
 use std::default::Default;
+use std::str::FromStr;
+
+#[derive(PartialEq)]
+pub enum Section {
+    Users,
+    Software,
+    Storage,
+}
+
+impl Section {
+    // TODO: we can rely on strum so we do not forget to add them
+    pub fn all() -> Vec<Section> {
+        vec![Section::Software, Section::Storage, Section::Users]
+    }
+}
+
+impl FromStr for Section {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        println!("{}", &s);
+        match s {
+            "users" => Ok(Self::Users),
+            "software" => Ok(Self::Software),
+            "storage" => Ok(Self::Storage),
+            _ => Err("Unknown section"),
+        }
+    }
+}
 
 /// Installation settings
 ///
@@ -14,20 +43,29 @@ use std::default::Default;
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct InstallSettings {
     #[serde(default)]
-    pub user: UserSettings,
+    pub user: Option<UserSettings>,
     #[serde(default)]
-    pub software: SoftwareSettings,
+    pub software: Option<SoftwareSettings>,
     #[serde(default)]
-    pub storage: StorageSettings,
+    pub storage: Option<StorageSettings>,
 }
 
 impl Settings for InstallSettings {
     fn add(&mut self, attr: &str, value: SettingObject) -> Result<(), &'static str> {
         if let Some((ns, id)) = attr.split_once('.') {
             match ns {
-                "software" => self.software.add(id, value)?,
-                "user" => self.user.add(id, value)?,
-                "storage" => self.storage.add(id, value)?,
+                "software" => {
+                    let software = self.software.get_or_insert(Default::default());
+                    software.add(id, value)?
+                }
+                "user" => {
+                    let user = self.user.get_or_insert(Default::default());
+                    user.add(id, value)?
+                }
+                "storage" => {
+                    let storage = self.storage.get_or_insert(Default::default());
+                    storage.add(id, value)?
+                }
                 _ => return Err("unknown attribute"),
             }
         }
@@ -37,9 +75,18 @@ impl Settings for InstallSettings {
     fn set(&mut self, attr: &str, value: SettingValue) -> Result<(), &'static str> {
         if let Some((ns, id)) = attr.split_once('.') {
             match ns {
-                "software" => self.software.set(id, value)?,
-                "user" => self.user.set(id, value)?,
-                "storage" => self.storage.set(id, value)?,
+                "software" => {
+                    let software = self.software.get_or_insert(Default::default());
+                    software.set(id, value)?
+                }
+                "user" => {
+                    let user = self.user.get_or_insert(Default::default());
+                    user.set(id, value)?
+                }
+                "storage" => {
+                    let storage = self.storage.get_or_insert(Default::default());
+                    storage.set(id, value)?
+                }
                 _ => return Err("unknown attribute"),
             }
         }
@@ -47,9 +94,20 @@ impl Settings for InstallSettings {
     }
 
     fn merge(&mut self, other: &Self) {
-        self.software.merge(&other.software);
-        self.user.merge(&other.user);
-        self.storage.merge(&other.storage);
+        if let Some(other_software) = &other.software {
+            let software = self.software.get_or_insert(Default::default());
+            software.merge(other_software);
+        }
+
+        if let Some(other_user) = &other.user {
+            let user = self.user.get_or_insert(Default::default());
+            user.merge(other_user);
+        }
+
+        if let Some(other_storage) = &other.storage {
+            let storage = self.storage.get_or_insert(Default::default());
+            storage.merge(other_storage);
+        }
     }
 }
 
