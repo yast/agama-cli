@@ -9,16 +9,20 @@ pub mod users;
 pub mod progress;
 pub mod proxies;
 mod store;
+use async_std::task::block_on;
 pub use store::Store;
 
 use std::path::Path;
 
-pub async fn connection() -> Result<zbus::Connection, zbus::Error> {
+pub fn connection() -> zbus::Connection {
     let path = if Path::new("/run/d-installer/bus").exists() {
         "/run/d-installer/bus"
     } else {
         "/run/dbus/system_bus_socket"
     };
     let address = format!("unix:path={path}");
-    zbus::ConnectionBuilder::address(address.as_str())?.build().await
+    block_on(
+        zbus::ConnectionBuilder::address(address.as_str())
+            .expect("Failed to create D-Bus connection").build()
+    ).expect("Failed to create D-Bus connection")
 }
