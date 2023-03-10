@@ -30,7 +30,7 @@ impl<'a> Store<'a> {
     pub fn load(&self, only: Option<Vec<Scope>>) -> Result<InstallSettings, Box<dyn Error>> {
         let scopes = match only {
             Some(scopes) => scopes,
-            None => Scope::all(),
+            None => Scope::all().to_vec(),
         };
 
         let mut settings: InstallSettings = Default::default();

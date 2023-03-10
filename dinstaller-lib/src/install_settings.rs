@@ -26,8 +26,8 @@ impl Scope {
     /// Returns known scopes
     ///
     // TODO: we can rely on strum so we do not forget to add them
-    pub fn all() -> Vec<Self> {
-        vec![Scope::Software, Scope::Storage, Scope::Users]
+    pub fn all() -> [Scope; 3] {
+        [Scope::Software, Scope::Storage, Scope::Users]
     }
 }
 
