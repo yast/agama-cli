@@ -1,6 +1,6 @@
 use crate::printers::{print, Format};
 use clap::Subcommand;
-use dinstaller_lib::install_settings::{InstallSettings, Key};
+use dinstaller_lib::install_settings::{InstallSettings, Scope};
 use dinstaller_lib::settings::{SettingObject, SettingValue, Settings};
 use dinstaller_lib::Store as SettingsStore;
 use std::str::FromStr;
@@ -33,11 +33,7 @@ pub fn run(subcommand: ConfigCommands, format: Option<Format>) -> Result<(), Box
 
     match parse_config_command(subcommand) {
         ConfigAction::Set(changes) => {
-            let scopes = changes
-                .keys()
-                .map(|k| Key::from_str(k).unwrap())
-                .map(|i| i.scope())
-                .collect();
+            let scopes = changes.keys().filter_map(|k| key_to_scope(k)).collect();
             let mut model = store.load(Some(scopes))?;
             for (key, value) in changes {
                 model.set(&key, SettingValue(value))?;
@@ -50,16 +46,15 @@ pub fn run(subcommand: ConfigCommands, format: Option<Format>) -> Result<(), Box
             Ok(())
         }
         ConfigAction::Add(key, values) => {
-            let key = Key::from_str(&key)?;
-            let mut model = store.load(Some(vec![key.scope()]))?;
-            model.add(&key.to_string(), SettingObject::from(values))?;
+            let scope = key_to_scope(&key).unwrap();
+            let mut model = store.load(Some(vec![scope]))?;
+            model.add(&key, SettingObject::from(values))?;
             store.store(&model)
         }
         ConfigAction::Load(path) => {
             let contents = std::fs::read_to_string(path)?;
             let result: InstallSettings = serde_json::from_str(&contents).unwrap();
             let scopes = result.defined_scopes();
-            dbg!(&scopes);
             let mut model = store.load(Some(scopes))?;
             model.merge(&result);
             store.store(&model)
@@ -87,4 +82,11 @@ fn parse_keys_values(keys_values: Vec<String>) -> HashMap<String, String> {
             }
         })
         .collect()
+}
+
+fn key_to_scope(key: &str) -> Option<Scope> {
+    if let Some((name, _)) = key.split_once('.') {
+        return Scope::from_str(name).ok();
+    }
+    None
 }

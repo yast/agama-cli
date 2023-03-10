@@ -9,6 +9,9 @@ use std::default::Default;
 use std::str::FromStr;
 
 /// Settings scopes
+///
+/// They are used to limit the reading/writing of settings. For instance, if the Scope::Users is
+/// given, only the data related to users (UsersStore) are read/written.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Scope {
     /// User settings
@@ -38,46 +41,6 @@ impl FromStr for Scope {
             "storage" => Ok(Self::Storage),
             _ => Err("Unknown section"),
         }
-    }
-}
-
-impl ToString for Scope {
-    fn to_string(&self) -> String {
-        match self {
-            Scope::Users => String::from("user"),
-            Scope::Software => String::from("software"),
-            Scope::Storage => String::from("storage"),
-        }
-    }
-}
-
-pub struct Key(Scope, String);
-
-impl Key {
-    pub fn scope(&self) -> Scope {
-        self.0
-    }
-
-    pub fn path(&self) -> &str {
-        &self.1
-    }
-}
-
-impl ToString for Key {
-    fn to_string(&self) -> String {
-        format!("{}.{}", self.scope().to_string(), &self.path())
-    }
-}
-
-impl FromStr for Key {
-    type Err = &'static str;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if let Some((scope_name, path)) = s.split_once('.') {
-            let scope = Scope::from_str(scope_name)?;
-            return Ok(Key(scope, path.to_string()));
-        }
-        Err("not a valid key")
     }
 }
 
