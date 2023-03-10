@@ -1,82 +1,64 @@
-use crate::install_settings::{InstallSettings, SoftwareSettings, StorageSettings, UserSettings};
-use crate::software::SoftwareClient;
-use crate::storage::StorageClient;
-use crate::users::{FirstUser, UsersClient};
-use std::{default::Default, error::Error};
+mod software;
+mod storage;
+mod users;
+
+use crate::install_settings::{InstallSettings, Scope};
+use crate::store::software::SoftwareStore;
+use crate::store::storage::StorageStore;
+use crate::store::users::UsersStore;
+use std::error::Error;
 
 /// Loading and storing the settings in the D-Bus service
 ///
 /// This struct uses the default connection built by [connection function](super::connection).
 pub struct Store<'a> {
-    users_client: UsersClient<'a>,
-    software_client: SoftwareClient<'a>,
-    storage_client: StorageClient<'a>,
+    users: UsersStore<'a>,
+    software: SoftwareStore<'a>,
+    storage: StorageStore<'a>,
 }
 
 impl<'a> Store<'a> {
     pub fn new() -> Result<Self, zbus::Error> {
         Ok(Self {
-            users_client: UsersClient::new(super::connection()?)?,
-            software_client: SoftwareClient::new(super::connection()?)?,
-            storage_client: StorageClient::new(super::connection()?)?,
+            users: UsersStore::new(super::connection()?)?,
+            software: SoftwareStore::new(super::connection()?)?,
+            storage: StorageStore::new(super::connection()?)?,
         })
     }
 
     /// Loads the installation settings from the D-Bus service
-    pub fn load(&self) -> Result<InstallSettings, Box<dyn Error>> {
-        let first_user = self.users_client.first_user()?;
-        let product = self.software_client.product()?;
-
-        let settings = InstallSettings {
-            storage: Default::default(),
-            software: SoftwareSettings {
-                product: Some(product),
-            },
-            user: UserSettings {
-                user_name: Some(first_user.user_name),
-                autologin: Some(first_user.autologin),
-                full_name: Some(first_user.full_name),
-                password: Some(first_user.password),
-            },
+    pub fn load(&self, only: Option<Vec<Scope>>) -> Result<InstallSettings, Box<dyn Error>> {
+        let scopes = match only {
+            Some(scopes) => scopes,
+            None => Scope::all().to_vec(),
         };
+
+        let mut settings: InstallSettings = Default::default();
+        if scopes.contains(&Scope::Storage) {
+            settings.storage = Some(self.storage.load()?);
+        }
+
+        if scopes.contains(&Scope::Software) {
+            settings.software = Some(self.software.load()?);
+        }
+
+        if scopes.contains(&Scope::Users) {
+            settings.user = Some(self.users.load()?);
+        }
         Ok(settings)
     }
 
     /// Stores the given installation settings in the D-Bus service
     pub fn store(&self, settings: &InstallSettings) -> Result<(), Box<dyn Error>> {
-        self.store_software_settings(&settings.software)?;
-        self.store_user_settings(&settings.user)?;
-        self.store_storage_settings(&settings.storage)?;
-        Ok(())
-    }
-
-    fn store_user_settings(&self, settings: &UserSettings) -> Result<(), Box<dyn Error>> {
-        // fixme: improve
-        let first_user = FirstUser {
-            user_name: settings.user_name.clone().unwrap_or_default(),
-            full_name: settings.full_name.clone().unwrap_or_default(),
-            autologin: settings.autologin.unwrap_or_default(),
-            password: settings.password.clone().unwrap_or_default(),
-            ..Default::default()
-        };
-        self.users_client.set_first_user(&first_user)?;
-        Ok(())
-    }
-
-    fn store_software_settings(&self, settings: &SoftwareSettings) -> Result<(), Box<dyn Error>> {
-        if let Some(product) = &settings.product {
-            self.software_client.select_product(product)?;
+        if let Some(software) = &settings.software {
+            self.software.store(software)?;
         }
-        Ok(())
-    }
-
-    fn store_storage_settings(&self, settings: &StorageSettings) -> Result<(), Box<dyn Error>> {
-        self.storage_client.calculate(
-            settings.devices.iter().map(|d| d.name.clone()).collect(),
-            settings.encryption_password.clone().unwrap_or_default(),
-            settings.lvm.unwrap_or_default(),
-        )?;
-        // TODO: convert the returned value to an error
+        if let Some(user) = &settings.user {
+            self.users.store(user)?;
+        }
+        if let Some(storage) = &settings.storage {
+            self.storage.store(storage)?;
+        }
         Ok(())
     }
 }

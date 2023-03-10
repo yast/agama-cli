@@ -66,7 +66,7 @@ pub trait Settings {
         Err("unknown attribute")
     }
 
-    fn merge(&mut self, _other: Self)
+    fn merge(&mut self, _other: &Self)
     where
         Self: Sized,
     {

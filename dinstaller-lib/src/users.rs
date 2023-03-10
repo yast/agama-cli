@@ -45,7 +45,7 @@ impl FirstUser {
         FirstUser {
             user_name: settings.user_name.clone().unwrap_or_default(),
             full_name: settings.full_name.clone().unwrap_or_default(),
-            autologin: settings.autologin.clone().unwrap_or_default(),
+            autologin: settings.autologin.unwrap_or_default(),
             password: settings.password.clone().unwrap_or_default(),
             ..Default::default()
         }
