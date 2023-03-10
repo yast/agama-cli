@@ -7,6 +7,7 @@ use crate::store::software::SoftwareStore;
 use crate::store::storage::StorageStore;
 use crate::store::users::UsersStore;
 use std::error::Error;
+use zbus::Connection;
 
 /// Loading and storing the settings in the D-Bus service
 ///
@@ -18,16 +19,16 @@ pub struct Store<'a> {
 }
 
 impl<'a> Store<'a> {
-    pub fn new() -> Result<Self, zbus::Error> {
+    pub async fn new(connection: Connection) -> Result<Store<'a>, zbus::Error> {
         Ok(Self {
-            users: UsersStore::new(super::connection()?)?,
-            software: SoftwareStore::new(super::connection()?)?,
-            storage: StorageStore::new(super::connection()?)?,
+            users: UsersStore::new(connection.clone()).await?,
+            software: SoftwareStore::new(connection.clone()).await?,
+            storage: StorageStore::new(connection).await?,
         })
     }
 
     /// Loads the installation settings from the D-Bus service
-    pub fn load(&self, only: Option<Vec<Scope>>) -> Result<InstallSettings, Box<dyn Error>> {
+    pub async fn load(&self, only: Option<Vec<Scope>>) -> Result<InstallSettings, Box<dyn Error>> {
         let scopes = match only {
             Some(scopes) => scopes,
             None => Scope::all().to_vec(),
@@ -35,29 +36,31 @@ impl<'a> Store<'a> {
 
         let mut settings: InstallSettings = Default::default();
         if scopes.contains(&Scope::Storage) {
-            settings.storage = Some(self.storage.load()?);
+            settings.storage = Some(self.storage.load().await?);
         }
 
         if scopes.contains(&Scope::Software) {
-            settings.software = Some(self.software.load()?);
+            settings.software = Some(self.software.load().await?);
         }
 
         if scopes.contains(&Scope::Users) {
-            settings.user = Some(self.users.load()?);
+            settings.user = Some(self.users.load().await?);
         }
+
+        // TODO: use try_join here
         Ok(settings)
     }
 
     /// Stores the given installation settings in the D-Bus service
-    pub fn store(&self, settings: &InstallSettings) -> Result<(), Box<dyn Error>> {
+    pub async fn store(&self, settings: &InstallSettings) -> Result<(), Box<dyn Error>> {
         if let Some(software) = &settings.software {
-            self.software.store(software)?;
+            self.software.store(software).await?;
         }
         if let Some(user) = &settings.user {
-            self.users.store(user)?;
+            self.users.store(user).await?;
         }
         if let Some(storage) = &settings.storage {
-            self.storage.store(storage)?;
+            self.storage.store(storage).await?;
         }
         Ok(())
     }

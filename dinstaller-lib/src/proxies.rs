@@ -22,8 +22,8 @@ use zbus::dbus_proxy;
     interface = "org.opensuse.DInstaller.Progress1",
     default_service = "org.opensuse.DInstaller",
     default_path = "/org/opensuse/DInstaller/Manager1",
-    gen_async = false,
-    gen_blocking = true
+    gen_async = true,
+    gen_blocking = false
 )]
 trait Progress1 {
     /// CurrentStep property
@@ -44,8 +44,8 @@ trait Progress1 {
     interface = "org.opensuse.DInstaller.ServiceStatus1",
     default_service = "org.opensuse.DInstaller",
     default_path = "/org/opensuse/DInstaller/Manager1",
-    gen_async = false,
-    gen_blocking = true
+    gen_async = true,
+    gen_blocking = false
 )]
 trait ServiceStatus1 {
     /// All property
@@ -63,8 +63,8 @@ trait ServiceStatus1 {
     interface = "org.opensuse.DInstaller.Manager1",
     default_service = "org.opensuse.DInstaller",
     default_path = "/org/opensuse/DInstaller/Manager1",
-    gen_async = false,
-    gen_blocking = true
+    gen_async = true,
+    gen_blocking = false
 )]
 trait Manager1 {
     /// CanInstall method
@@ -152,8 +152,8 @@ trait Questions1 {
     interface = "org.opensuse.DInstaller.Software1",
     default_service = "org.opensuse.DInstaller.Software",
     default_path = "/org/opensuse/DInstaller/Software1",
-    gen_async = false,
-    gen_blocking = true
+    gen_async = true,
+    gen_blocking = false
 )]
 trait Software1 {
     /// Finish method
@@ -201,8 +201,8 @@ trait Software1 {
     interface = "org.opensuse.DInstaller.Software.Proposal1",
     default_service = "org.opensuse.DInstaller.Software",
     default_path = "/org/opensuse/DInstaller/Software/Proposal1",
-    gen_async = false,
-    gen_blocking = true
+    gen_async = true,
+    gen_blocking = false
 )]
 trait SoftwareProposal1 {
     /// AddResolvables method
@@ -255,8 +255,8 @@ trait Validation1 {
     interface = "org.opensuse.DInstaller.Storage1",
     default_service = "org.opensuse.DInstaller.Storage",
     default_path = "/org/opensuse/DInstaller/Storage1",
-    gen_async = false,
-    gen_blocking = true
+    gen_async = true,
+    gen_blocking = false
 )]
 trait Storage1 {
     /// Finish method
@@ -274,8 +274,8 @@ trait Storage1 {
     default_path = "/org/opensuse/DInstaller/Storage1",
     interface = "org.opensuse.DInstaller.Storage1.Proposal.Calculator",
     assume_defaults = true,
-    gen_async = false,
-    gen_blocking = true
+    gen_async = true,
+    gen_blocking = false
 )]
 trait Calculator {
     /// Calculate method
@@ -311,8 +311,8 @@ trait Calculator {
     interface = "org.opensuse.DInstaller.Storage1.Proposal",
     default_service = "org.opensuse.DInstaller.Storage",
     default_path = "/org/opensuse/DInstaller/Storage1/Proposal",
-    gen_async = false,
-    gen_blocking = true
+    gen_async = true,
+    gen_blocking = false
 )]
 trait StorageProposal {
     /// Actions property
@@ -344,8 +344,8 @@ trait StorageProposal {
     interface = "org.opensuse.DInstaller.Users1",
     default_service = "org.opensuse.DInstaller.Users",
     default_path = "/org/opensuse/DInstaller/Users1",
-    gen_async = false,
-    gen_blocking = true
+    gen_async = true,
+    gen_blocking = false
 )]
 trait Users1 {
     /// RemoveFirstUser method

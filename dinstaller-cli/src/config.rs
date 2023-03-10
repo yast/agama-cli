@@ -1,5 +1,6 @@
 use crate::printers::{print, Format};
 use clap::Subcommand;
+use dinstaller_lib::connection;
 use dinstaller_lib::install_settings::{InstallSettings, Scope};
 use dinstaller_lib::settings::{SettingObject, SettingValue, Settings};
 use dinstaller_lib::Store as SettingsStore;
@@ -28,36 +29,36 @@ pub enum ConfigAction {
     Load(String),
 }
 
-pub fn run(subcommand: ConfigCommands, format: Option<Format>) -> Result<(), Box<dyn Error>> {
-    let store = SettingsStore::new()?;
+pub async fn run(subcommand: ConfigCommands, format: Option<Format>) -> Result<(), Box<dyn Error>> {
+    let store = SettingsStore::new(connection().await?).await?;
 
     match parse_config_command(subcommand) {
         ConfigAction::Set(changes) => {
             let scopes = changes.keys().filter_map(|k| key_to_scope(k)).collect();
-            let mut model = store.load(Some(scopes))?;
+            let mut model = store.load(Some(scopes)).await?;
             for (key, value) in changes {
                 model.set(&key, SettingValue(value))?;
             }
-            store.store(&model)
+            store.store(&model).await
         }
         ConfigAction::Show => {
-            let model = store.load(None)?;
+            let model = store.load(None).await?;
             print(model, io::stdout(), format)?;
             Ok(())
         }
         ConfigAction::Add(key, values) => {
             let scope = key_to_scope(&key).unwrap();
-            let mut model = store.load(Some(vec![scope]))?;
+            let mut model = store.load(Some(vec![scope])).await?;
             model.add(&key, SettingObject::from(values))?;
-            store.store(&model)
+            store.store(&model).await
         }
         ConfigAction::Load(path) => {
             let contents = std::fs::read_to_string(path)?;
             let result: InstallSettings = serde_json::from_str(&contents).unwrap();
             let scopes = result.defined_scopes();
-            let mut model = store.load(Some(scopes))?;
+            let mut model = store.load(Some(scopes)).await?;
             model.merge(&result);
-            store.store(&model)
+            store.store(&model).await
         }
     }
 }

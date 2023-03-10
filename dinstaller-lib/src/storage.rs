@@ -1,7 +1,7 @@
 use super::proxies::{CalculatorProxy, Storage1Proxy, StorageProposalProxy};
 use serde::Serialize;
 use std::collections::HashMap;
-use zbus::blocking::Connection;
+use zbus::Connection;
 
 /// Represents a storage device
 #[derive(Serialize, Debug)]
@@ -18,10 +18,10 @@ pub struct StorageClient<'a> {
 }
 
 impl<'a> StorageClient<'a> {
-    pub fn new(connection: Connection) -> zbus::Result<Self> {
+    pub async fn new(connection: Connection) -> zbus::Result<StorageClient<'a>> {
         Ok(Self {
-            calculator_proxy: CalculatorProxy::new(&connection)?,
-            storage_proxy: Storage1Proxy::new(&connection)?,
+            calculator_proxy: CalculatorProxy::new(&connection).await?,
+            storage_proxy: Storage1Proxy::new(&connection).await?,
             connection,
         })
     }
@@ -30,17 +30,17 @@ impl<'a> StorageClient<'a> {
     ///
     /// The proposal might not exist.
     // NOTE: should we implement some kind of memoization?
-    fn proposal_proxy(&self) -> zbus::Result<StorageProposalProxy<'a>> {
-        StorageProposalProxy::new(&self.connection)
+    async fn proposal_proxy(&self) -> zbus::Result<StorageProposalProxy<'a>> {
+        StorageProposalProxy::new(&self.connection).await
     }
 
     /// Returns the available devices
     ///
     /// These devices can be used for installing the system.
-    pub fn available_devices(&self) -> zbus::Result<Vec<StorageDevice>> {
+    pub async fn available_devices(&self) -> zbus::Result<Vec<StorageDevice>> {
         let devices: Vec<_> = self
             .calculator_proxy
-            .available_devices()?
+            .available_devices().await?
             .into_iter()
             .map(|(name, description, _)| StorageDevice { name, description })
             .collect();
@@ -48,16 +48,16 @@ impl<'a> StorageClient<'a> {
     }
 
     /// Returns the candidate devices for the proposal
-    pub fn candidate_devices(&self) -> zbus::Result<Vec<String>> {
-        self.proposal_proxy()?.candidate_devices()
+    pub async fn candidate_devices(&self) -> zbus::Result<Vec<String>> {
+        self.proposal_proxy().await?.candidate_devices().await
     }
 
     /// Runs the probing process
-    pub fn probe(&self) -> zbus::Result<()> {
-        self.storage_proxy.probe()
+    pub async fn probe(&self) -> zbus::Result<()> {
+        self.storage_proxy.probe().await
     }
 
-    pub fn calculate(
+    pub async fn calculate(
         &self,
         candidate_devices: Vec<String>,
         encryption_password: String,
@@ -73,6 +73,6 @@ impl<'a> StorageClient<'a> {
             zbus::zvariant::Value::new(encryption_password),
         );
         settings.insert("LVM", zbus::zvariant::Value::new(lvm));
-        self.calculator_proxy.calculate(settings)
+        self.calculator_proxy.calculate(settings).await
     }
 }
