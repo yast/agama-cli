@@ -36,7 +36,6 @@ impl<'a> Store<'a> {
         let mut settings: InstallSettings = Default::default();
         if scopes.contains(&Scope::Storage) {
             settings.storage = Some(self.storage.load().await?);
-            // futures.push(settings.storage = Some(self.storage.load().await?));
         }
 
         if scopes.contains(&Scope::Software) {
