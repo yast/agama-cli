@@ -7,6 +7,7 @@ use crate::store::software::SoftwareStore;
 use crate::store::storage::StorageStore;
 use crate::store::users::UsersStore;
 use std::error::Error;
+use zbus::Connection;
 
 /// Loading and storing the settings in the D-Bus service
 ///
@@ -18,11 +19,11 @@ pub struct Store<'a> {
 }
 
 impl<'a> Store<'a> {
-    pub async fn new() -> Result<Store<'a>, zbus::Error> {
+    pub async fn new(connection: Connection) -> Result<Store<'a>, zbus::Error> {
         Ok(Self {
-            users: UsersStore::new(super::connection().await?).await?,
-            software: SoftwareStore::new(super::connection().await?).await?,
-            storage: StorageStore::new(super::connection().await?).await?,
+            users: UsersStore::new(connection.clone()).await?,
+            software: SoftwareStore::new(connection.clone()).await?,
+            storage: StorageStore::new(connection).await?,
         })
     }
 

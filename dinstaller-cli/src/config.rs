@@ -1,5 +1,6 @@
 use crate::printers::{print, Format};
 use clap::Subcommand;
+use dinstaller_lib::connection;
 use dinstaller_lib::install_settings::{InstallSettings, Scope};
 use dinstaller_lib::settings::{SettingObject, SettingValue, Settings};
 use dinstaller_lib::Store as SettingsStore;
@@ -29,7 +30,7 @@ pub enum ConfigAction {
 }
 
 pub async fn run(subcommand: ConfigCommands, format: Option<Format>) -> Result<(), Box<dyn Error>> {
-    let store = SettingsStore::new().await?;
+    let store = SettingsStore::new(connection().await?).await?;
 
     match parse_config_command(subcommand) {
         ConfigAction::Set(changes) => {
