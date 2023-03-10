@@ -37,4 +37,3 @@ impl<'a> ManagerClient<'a> {
         Progress::from_proxy(&self.progress_proxy).await
     }
 }
-

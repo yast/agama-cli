@@ -1,4 +1,5 @@
 use crate::config::ConfigCommands;
+use crate::profile::ProfileCommands;
 use clap::Subcommand;
 
 #[derive(Subcommand, Debug)]
@@ -15,5 +16,8 @@ pub enum Commands {
     /// Start probing
     Probe,
     // Start Installation
-    Install
+    Install,
+    /// Autoinstallation profile handling
+    #[command(subcommand)]
+    Profile(ProfileCommands),
 }
