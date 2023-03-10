@@ -66,11 +66,11 @@ fn expand_merge_fn(field_name: &Vec<Ident>) -> TokenStream2 {
     }
 
     quote! {
-        fn merge(&mut self, other: Self)
+        fn merge(&mut self, other: &Self)
         where
             Self: Sized,
         {
-            #(if let Some(value) = other.#field_name {
+            #(if let Some(value) = &other.#field_name {
                 self.#field_name = Some(value.clone())
               })*
         }
