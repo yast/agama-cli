@@ -32,15 +32,15 @@ fn validate(path: String) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-async fn evaluate(path: String) -> Result<(), Box<dyn Error>> {
-    let evaluator = ProfileEvaluator::new().await?;
-    evaluator.evaluate(Path::new(&path)).await
+fn evaluate(path: String) -> Result<(), Box<dyn Error>> {
+    let evaluator = ProfileEvaluator {};
+    evaluator.evaluate(Path::new(&path))
 }
 
-pub async fn run(subcommand: ProfileCommands) -> Result<(), Box<dyn Error>> {
+pub fn run(subcommand: ProfileCommands) -> Result<(), Box<dyn Error>> {
     match subcommand {
         ProfileCommands::Download { url } => download(&url),
         ProfileCommands::Validate { path } => validate(path),
-        ProfileCommands::Evaluate { path } => evaluate(path).await,
+        ProfileCommands::Evaluate { path } => evaluate(path),
     }
 }

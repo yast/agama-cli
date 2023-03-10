@@ -84,11 +84,6 @@ trait Manager1 {
     #[dbus_proxy(property)]
     fn current_installation_phase(&self) -> zbus::Result<u32>;
 
-    /// Hwinfo property
-    #[dbus_proxy(property)]
-    fn hwinfo(&self)
-        -> zbus::Result<std::collections::HashMap<String, zbus::zvariant::OwnedValue>>;
-
     /// InstallationPhases property
     #[dbus_proxy(property)]
     fn installation_phases(

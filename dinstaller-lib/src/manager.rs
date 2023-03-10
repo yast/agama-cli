@@ -1,6 +1,4 @@
-use crate::hwinfo::HWInfo;
 use crate::{progress::Progress, proxies::Progress1Proxy};
-use std::error::Error;
 
 use super::proxies::Manager1Proxy;
 use zbus::Connection;
@@ -37,10 +35,5 @@ impl<'a> ManagerClient<'a> {
 
     pub async fn progress(&self) -> zbus::Result<Progress> {
         Progress::from_proxy(&self.progress_proxy).await
-    }
-
-    pub async fn hwinfo(&self) -> Result<HWInfo, Box<dyn Error>> {
-        let result = self.manager_proxy.hwinfo().await?;
-        HWInfo::from_dbus(result)
     }
 }

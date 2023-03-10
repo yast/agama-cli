@@ -1,7 +1,8 @@
-local dinstaller = import 'dinstaller.libsonnet';
+local dinstaller = import 'hw.libsonnet';
 local findBiggestDisk(disks) =
-  local sorted = std.sort(disks, function(x) x.size);
-  sorted[0].name;
+  local sizedDisks = std.filter(function(d) std.objectHas(d, 'size'), disks);
+  local sorted = std.sort(sizedDisks, function(x) x.size);
+  sorted[0].logicalname;
 
 {
   software: {
@@ -19,13 +20,15 @@ local findBiggestDisk(disks) =
   },
   storage: {
     devices: [
-      { name: findBiggestDisk(dinstaller.disks) },
+      {
+        name: findBiggestDisk(dinstaller.disks),
+      },
     ],
   },
   scripts: [
     {
       type: 'post',
-      url: 'https://myscript.org/test.sh',
+      url: 'https: //myscript.org/test.sh',
     },
     {
       type: 'pre',
