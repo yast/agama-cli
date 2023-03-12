@@ -1,3 +1,4 @@
+use crate::error::ProfileError;
 use curl::easy::Easy;
 use jsonschema::JSONSchema;
 use serde_json;
@@ -16,7 +17,7 @@ use tempfile::tempdir;
 /// TODO: add support for YaST-specific URLs
 /// TODO: do not write to stdout, but to something implementing the Write trait
 /// TODO: retry the download if it fails
-pub fn download(url: &str) -> Result<(), Box<dyn Error>> {
+pub fn download(url: &str) -> Result<(), ProfileError> {
     let mut easy = Easy::new();
     easy.url(url)?;
     easy.write_function(|data| {
@@ -57,7 +58,7 @@ pub struct ProfileValidator {
 }
 
 impl ProfileValidator {
-    pub fn default_schema() -> Result<Self, Box<dyn Error>> {
+    pub fn default_schema() -> Result<Self, ProfileError> {
         let relative_path = Path::new("dinstaller-lib/share/profile.schema.json");
         let path = if relative_path.exists() {
             relative_path
@@ -67,19 +68,19 @@ impl ProfileValidator {
         Self::new(path)
     }
 
-    pub fn new(schema_path: &Path) -> Result<Self, Box<dyn Error>> {
+    pub fn new(schema_path: &Path) -> Result<Self, ProfileError> {
         let contents = fs::read_to_string(schema_path)?;
         let schema = serde_json::from_str(&contents)?;
         let schema = JSONSchema::compile(&schema).expect("A valid schema");
         Ok(Self { schema })
     }
 
-    pub fn validate_file(&self, profile_path: &Path) -> Result<ValidationResult, Box<dyn Error>> {
+    pub fn validate_file(&self, profile_path: &Path) -> Result<ValidationResult, ProfileError> {
         let contents = fs::read_to_string(profile_path)?;
         self.validate_str(&contents)
     }
 
-    pub fn validate_str(&self, profile: &str) -> Result<ValidationResult, Box<dyn Error>> {
+    pub fn validate_str(&self, profile: &str) -> Result<ValidationResult, ProfileError> {
         let contents = serde_json::from_str(profile)?;
         let result = self.schema.validate(&contents);
         if let Err(errors) = result {
@@ -98,19 +99,21 @@ impl ProfileValidator {
 pub struct ProfileEvaluator {}
 
 impl ProfileEvaluator {
-    pub fn evaluate(&self, profile_path: &Path) -> Result<(), Box<dyn Error>> {
+    pub fn evaluate(&self, profile_path: &Path) -> Result<(), ProfileError> {
         let dir = tempdir()?;
 
         let working_path = dir.path().join("profile.jsonnet");
         fs::copy(profile_path, working_path)?;
 
         let hwinfo_path = dir.path().join("hw.libsonnet");
-        self.write_hwinfo(&hwinfo_path)?;
+        self.write_hwinfo(&hwinfo_path)
+            .map_err(|e| ProfileError::NoHardwareInfo(e))?;
 
         let result = Command::new("/usr/bin/jsonnet")
             .arg("profile.jsonnet")
             .current_dir(&dir)
-            .output()?;
+            .output()
+            .map_err(|e| ProfileError::EvaluationError(e))?;
         io::stdout().write_all(&result.stdout)?;
         Ok(())
     }
@@ -119,7 +122,7 @@ impl ProfileEvaluator {
     //
     // TODO: we need a better way to generate this information, as lshw and hwinfo are not usable
     // out of the box.
-    fn write_hwinfo(&self, path: &Path) -> Result<(), Box<dyn Error>> {
+    fn write_hwinfo(&self, path: &Path) -> Result<(), io::Error> {
         let result = Command::new("/usr/sbin/lshw")
             .args(&["-json", "-class", "disk"])
             .output()?;

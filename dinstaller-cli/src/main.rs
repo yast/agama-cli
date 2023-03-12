@@ -105,7 +105,11 @@ fn main() {
     match cli.command {
         Commands::Config(subcommand) => block_on(run_config_cmd(subcommand, cli.format)).unwrap(),
         Commands::Probe => block_on(probe(&manager)),
-        Commands::Profile(subcommand) => run_profile_cmd(subcommand).unwrap(),
+        Commands::Profile(subcommand) => {
+            if let Err(error) = run_profile_cmd(subcommand) {
+                eprintln!("{}", error);
+            }
+        }
         Commands::Install => block_on(install(&manager)),
         _ => unimplemented!(),
     }
