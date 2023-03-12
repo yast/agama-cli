@@ -1,3 +1,4 @@
+use crate::error::ServiceError;
 use crate::install_settings::StorageSettings;
 use crate::storage::StorageClient;
 use std::default::Default;
@@ -10,7 +11,7 @@ pub struct StorageStore<'a> {
 }
 
 impl<'a> StorageStore<'a> {
-    pub async fn new(connection: Connection) -> Result<StorageStore<'a>, zbus::Error> {
+    pub async fn new(connection: Connection) -> Result<StorageStore<'a>, ServiceError> {
         Ok(Self {
             storage_client: StorageClient::new(connection).await?,
         })

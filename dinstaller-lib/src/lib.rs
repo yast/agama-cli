@@ -12,14 +12,18 @@ pub mod proxies;
 mod store;
 pub use store::Store;
 
+use crate::error::ServiceError;
 use std::path::Path;
 
-pub async fn connection() -> Result<zbus::Connection, zbus::Error> {
+pub async fn connection() -> Result<zbus::Connection, ServiceError> {
     let path = if Path::new("/run/d-installer/bus").exists() {
         "/run/d-installer/bus"
     } else {
         "/run/dbus/system_bus_socket"
     };
     let address = format!("unix:path={path}");
-    zbus::ConnectionBuilder::address(address.as_str())?.build().await
+    let conn = zbus::ConnectionBuilder::address(address.as_str())?
+        .build()
+        .await?;
+    Ok(conn)
 }

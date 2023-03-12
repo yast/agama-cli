@@ -1,4 +1,5 @@
 use super::proxies::Software1Proxy;
+use crate::error::ServiceError;
 use serde::Serialize;
 use zbus::Connection;
 
@@ -19,17 +20,18 @@ pub struct SoftwareClient<'a> {
 }
 
 impl<'a> SoftwareClient<'a> {
-    pub async fn new(connection: Connection) -> zbus::Result<SoftwareClient<'a>> {
+    pub async fn new(connection: Connection) -> Result<SoftwareClient<'a>, ServiceError> {
         Ok(Self {
             software_proxy: Software1Proxy::new(&connection).await?,
         })
     }
 
     /// Returns the available products
-    pub async fn products(&self) -> zbus::Result<Vec<Product>> {
+    pub async fn products(&self) -> Result<Vec<Product>, ServiceError> {
         let products: Vec<Product> = self
             .software_proxy
-            .available_base_products().await?
+            .available_base_products()
+            .await?
             .into_iter()
             .map(|(id, name, data)| {
                 let description = match data.get("description") {
@@ -47,12 +49,12 @@ impl<'a> SoftwareClient<'a> {
     }
 
     /// Returns the selected product to install
-    pub async fn product(&self) -> zbus::Result<String> {
-        self.software_proxy.selected_base_product().await
+    pub async fn product(&self) -> Result<String, ServiceError> {
+        Ok(self.software_proxy.selected_base_product().await?)
     }
 
     /// Selects the product to install
-    pub async fn select_product(&self, product_id: &str) -> zbus::Result<()> {
-        self.software_proxy.select_product(product_id).await
+    pub async fn select_product(&self, product_id: &str) -> Result<(), ServiceError> {
+        Ok(self.software_proxy.select_product(product_id).await?)
     }
 }

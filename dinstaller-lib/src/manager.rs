@@ -1,3 +1,4 @@
+use crate::error::ServiceError;
 use crate::{progress::Progress, proxies::Progress1Proxy};
 
 use super::proxies::Manager1Proxy;
@@ -17,23 +18,23 @@ impl<'a> ManagerClient<'a> {
         })
     }
 
-    pub async fn busy_services(&self) -> zbus::Result<Vec<String>> {
-        self.manager_proxy.busy_services().await
+    pub async fn busy_services(&self) -> Result<Vec<String>, ServiceError> {
+        Ok(self.manager_proxy.busy_services().await?)
     }
 
-    pub async fn probe(&self) -> zbus::Result<()> {
-        self.manager_proxy.probe().await
+    pub async fn probe(&self) -> Result<(), ServiceError> {
+        Ok(self.manager_proxy.probe().await?)
     }
 
-    pub async fn install(&self) -> zbus::Result<()> {
-        self.manager_proxy.commit().await
+    pub async fn install(&self) -> Result<(), ServiceError> {
+        Ok(self.manager_proxy.commit().await?)
     }
 
-    pub async fn can_install(&self) -> zbus::Result<bool> {
-        self.manager_proxy.can_install().await
+    pub async fn can_install(&self) -> Result<bool, ServiceError> {
+        Ok(self.manager_proxy.can_install().await?)
     }
 
     pub async fn progress(&self) -> zbus::Result<Progress> {
-        Progress::from_proxy(&self.progress_proxy).await
+        Ok(Progress::from_proxy(&self.progress_proxy).await?)
     }
 }
