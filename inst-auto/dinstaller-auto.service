@@ -1,0 +1,11 @@
+[Unit]
+Description=DInstaller automatic profile runner
+
+[Service]
+ExecStart=/usr/bin/auto.sh
+
+[Install]
+# it needs to dbus, so it has access to dinstaller dbus interface
+Wanted=dbus
+# it needs to NetworkManager, so it has access to it
+Wanted=NetworkManager
