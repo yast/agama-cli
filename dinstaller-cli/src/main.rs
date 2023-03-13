@@ -89,7 +89,8 @@ async fn build_manager<'a>() -> Result<ManagerClient<'a>, ServiceError> {
     Ok(ManagerClient::new(conn).await?)
 }
 
-fn main() {
+#[async_std::main]
+async fn main() {
     let manager = match block_on(build_manager()) {
         Ok(manager) => manager,
         Err(error) => {
