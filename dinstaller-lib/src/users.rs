@@ -1,6 +1,7 @@
 //! Users configuration support
 
 use super::proxies::Users1Proxy;
+use crate::error::ServiceError;
 use crate::install_settings::UserSettings;
 use crate::settings::{SettingValue, Settings};
 use serde::Serialize;
@@ -83,8 +84,8 @@ impl<'a> UsersClient<'a> {
     }
 
     /// Whether the root password is set or not
-    pub async fn is_root_password(&self) -> zbus::Result<bool> {
-        self.users_proxy.root_password_set().await
+    pub async fn is_root_password(&self) -> Result<bool, ServiceError> {
+        Ok(self.users_proxy.root_password_set().await?)
     }
 
     /// Returns the SSH key for the root user
@@ -93,13 +94,18 @@ impl<'a> UsersClient<'a> {
     }
 
     /// Set the configuration for the first user
-    pub async fn set_first_user(&self, first_user: &FirstUser) -> zbus::Result<(bool, Vec<String>)> {
-        self.users_proxy.set_first_user(
-            &first_user.full_name,
-            &first_user.user_name,
-            &first_user.password,
-            first_user.autologin,
-            std::collections::HashMap::new(),
-        ).await
+    pub async fn set_first_user(
+        &self,
+        first_user: &FirstUser,
+    ) -> zbus::Result<(bool, Vec<String>)> {
+        self.users_proxy
+            .set_first_user(
+                &first_user.full_name,
+                &first_user.user_name,
+                &first_user.password,
+                first_user.autologin,
+                std::collections::HashMap::new(),
+            )
+            .await
     }
 }

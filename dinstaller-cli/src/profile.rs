@@ -1,4 +1,5 @@
 use clap::Subcommand;
+use dinstaller_lib::error::ProfileError;
 use dinstaller_lib::profile::{download, ProfileEvaluator, ProfileValidator, ValidationResult};
 use std::{error::Error, path::Path};
 
@@ -14,7 +15,7 @@ pub enum ProfileCommands {
     Evaluate { path: String },
 }
 
-fn validate(path: String) -> Result<(), Box<dyn Error>> {
+fn validate(path: String) -> Result<(), ProfileError> {
     let validator = ProfileValidator::default_schema()?;
     let path = Path::new(&path);
     let result = validator.validate_file(path)?;
@@ -32,12 +33,12 @@ fn validate(path: String) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn evaluate(path: String) -> Result<(), Box<dyn Error>> {
+fn evaluate(path: String) -> Result<(), ProfileError> {
     let evaluator = ProfileEvaluator {};
     evaluator.evaluate(Path::new(&path))
 }
 
-pub fn run(subcommand: ProfileCommands) -> Result<(), Box<dyn Error>> {
+pub fn run(subcommand: ProfileCommands) -> Result<(), ProfileError> {
     match subcommand {
         ProfileCommands::Download { url } => download(&url),
         ProfileCommands::Validate { path } => validate(path),

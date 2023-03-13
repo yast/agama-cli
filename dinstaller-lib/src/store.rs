@@ -2,6 +2,7 @@ mod software;
 mod storage;
 mod users;
 
+use crate::error::ServiceError;
 use crate::install_settings::{InstallSettings, Scope};
 use crate::store::software::SoftwareStore;
 use crate::store::storage::StorageStore;
@@ -19,7 +20,7 @@ pub struct Store<'a> {
 }
 
 impl<'a> Store<'a> {
-    pub async fn new(connection: Connection) -> Result<Store<'a>, zbus::Error> {
+    pub async fn new(connection: Connection) -> Result<Store<'a>, ServiceError> {
         Ok(Self {
             users: UsersStore::new(connection.clone()).await?,
             software: SoftwareStore::new(connection.clone()).await?,

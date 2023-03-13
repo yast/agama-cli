@@ -1,3 +1,4 @@
+use crate::error::ServiceError;
 use crate::install_settings::SoftwareSettings;
 use crate::software::SoftwareClient;
 use std::error::Error;
@@ -9,7 +10,7 @@ pub struct SoftwareStore<'a> {
 }
 
 impl<'a> SoftwareStore<'a> {
-    pub async fn new(connection: Connection) -> Result<SoftwareStore<'a>, zbus::Error> {
+    pub async fn new(connection: Connection) -> Result<SoftwareStore<'a>, ServiceError> {
         Ok(Self {
             software_client: SoftwareClient::new(connection).await?,
         })
