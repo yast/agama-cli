@@ -29,7 +29,7 @@ struct Cli {
 async fn probe(manager: &ManagerClient<'_>) {
     let probe = task::spawn(async {
         // use new manager here
-        let another_manager = ManagerClient::new(dinstaller_lib::connection().await.unwrap())
+        let another_manager = ManagerClient::new(dinstaller_lib::connection())
             .await
             .unwrap();
         another_manager.probe().await.unwrap()
@@ -47,7 +47,7 @@ async fn install(manager: &ManagerClient<'_>) {
     }
     let install = task::spawn(async {
         // use new manager here
-        let another_manager = ManagerClient::new(dinstaller_lib::connection().await.unwrap())
+        let another_manager = ManagerClient::new(dinstaller_lib::connection())
             .await
             .unwrap();
         another_manager.install().await.unwrap()
@@ -84,19 +84,21 @@ async fn wait_for_services(manager: &ManagerClient<'_>) {
 }
 
 fn main() {
-    let manager = block_on(ManagerClient::new(
-        block_on(dinstaller_lib::connection()).unwrap(),
-    ))
-    .unwrap();
-    // get all attributes to proxy, so later we can rely on signals when dbus service will be blocked
-    block_on(manager.progress()).unwrap().max_steps;
-    block_on(wait_for_services(&manager));
-    let cli = Cli::parse();
-    match cli.command {
-        Commands::Config(subcommand) => block_on(run_config_cmd(subcommand, cli.format)).unwrap(),
-        Commands::Probe => block_on(probe(&manager)),
-        Commands::Profile(subcommand) => run_profile_cmd(subcommand).unwrap(),
-        Commands::Install => block_on(install(&manager)),
-        _ => unimplemented!(),
-    }
+    block_on( async {
+        let manager = ManagerClient::new(
+            dinstaller_lib::connection(),
+        )
+        .await.unwrap();
+        // get all attributes to proxy, so later we can rely on signals when dbus service will be blocked
+        manager.progress().await.unwrap().max_steps;
+        wait_for_services(&manager).await;
+        let cli = Cli::parse();
+        match cli.command {
+            Commands::Config(subcommand) => run_config_cmd(subcommand, cli.format).await.unwrap(),
+            Commands::Probe => probe(&manager).await,
+            Commands::Profile(subcommand) => run_profile_cmd(subcommand).unwrap(),  
+            Commands::Install => install(&manager).await,
+            _ => unimplemented!(),
+        }
+    } )
 }

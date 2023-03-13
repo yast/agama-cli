@@ -30,7 +30,7 @@ pub enum ConfigAction {
 }
 
 pub async fn run(subcommand: ConfigCommands, format: Option<Format>) -> Result<(), Box<dyn Error>> {
-    let store = SettingsStore::new(connection().await?).await?;
+    let store = SettingsStore::new(connection()).await?;
 
     match parse_config_command(subcommand) {
         ConfigAction::Set(changes) => {
