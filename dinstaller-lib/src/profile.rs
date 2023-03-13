@@ -59,7 +59,7 @@ pub struct ProfileValidator {
 
 impl ProfileValidator {
     pub fn default_schema() -> Result<Self, ProfileError> {
-        let relative_path = Path::new("dinstaller-lib/share/profile.schema.json");
+        let relative_path = Path::new("share/profile.schema.json");
         let path = if relative_path.exists() {
             relative_path
         } else {
