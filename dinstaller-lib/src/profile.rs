@@ -39,8 +39,9 @@ pub enum ValidationResult {
 /// ```
 /// # use dinstaller_lib::profile::{ProfileValidator, ValidationResult};
 /// # use std::path::Path;
-/// let validator = ProfileValidator::default_schema()
-///   .expect("the default validtor");
+/// let validator = ProfileValidator::new(
+///   Path::new("share/profile.schema.json")
+/// ).expect("the default validator");
 ///
 /// // you can validate a &str
 /// let wrong_profile = r#"
