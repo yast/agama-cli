@@ -9,6 +9,7 @@ pub mod users;
 // TODO: maybe expose only clients when we have it?
 pub mod progress;
 pub mod proxies;
+pub mod questions;
 mod store;
 pub use store::Store;
 

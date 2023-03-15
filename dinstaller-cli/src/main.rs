@@ -7,7 +7,7 @@ mod profile;
 
 use async_std::task::{self, block_on};
 use commands::Commands;
-use dinstaller_lib::manager::ManagerClient;
+use dinstaller_lib::{manager::ManagerClient, questions::QuestionsClient};
 use indicatif::ProgressBar;
 use printers::Format;
 use std::time::Duration;
@@ -64,7 +64,18 @@ async fn show_progress(client: &ManagerClient<'_>) {
     let mut progress = client.progress().await.unwrap();
     eprintln!("Showing progress with max steps {:?}", progress.max_steps);
     let pb = ProgressBar::new(progress.max_steps.into());
+    let questions = QuestionsClient::new(dinstaller_lib::connection().await.unwrap()).await.unwrap();
+    let mut question_showed = false;
     loop {
+        if !questions.is_empty().await.unwrap(){
+            if !question_showed {
+                eprintln!("There is question to answer.");
+                question_showed = true;
+            }
+            std::thread::sleep(std::time::Duration::from_secs(1));
+            continue;
+        }
+        question_showed = false;
         if progress.finished {
             pb.finish();
             return;
