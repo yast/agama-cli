@@ -1,3 +1,4 @@
+use crate::error::CliError;
 use crate::printers::{print, Format};
 use clap::Subcommand;
 use dinstaller_lib::connection;
@@ -34,7 +35,10 @@ pub async fn run(subcommand: ConfigCommands, format: Option<Format>) -> Result<(
 
     match parse_config_command(subcommand) {
         ConfigAction::Set(changes) => {
-            let scopes = changes.keys().filter_map(|k| key_to_scope(k)).collect();
+            let scopes = changes
+                .keys()
+                .filter_map(|k| key_to_scope(k).ok())
+                .collect();
             let mut model = store.load(Some(scopes)).await?;
             for (key, value) in changes {
                 model.set(&key, SettingValue(value))?;
@@ -54,7 +58,7 @@ pub async fn run(subcommand: ConfigCommands, format: Option<Format>) -> Result<(
         }
         ConfigAction::Load(path) => {
             let contents = std::fs::read_to_string(path)?;
-            let result: InstallSettings = serde_json::from_str(&contents).unwrap();
+            let result: InstallSettings = serde_json::from_str(&contents)?;
             let scopes = result.defined_scopes();
             let mut model = store.load(Some(scopes)).await?;
             model.merge(&result);
@@ -85,9 +89,9 @@ fn parse_keys_values(keys_values: Vec<String>) -> HashMap<String, String> {
         .collect()
 }
 
-fn key_to_scope(key: &str) -> Option<Scope> {
+fn key_to_scope(key: &str) -> Result<Scope, Box<dyn Error>> {
     if let Some((name, _)) = key.split_once('.') {
-        return Scope::from_str(name).ok();
+        return Ok(Scope::from_str(name)?);
     }
-    None
+    Err(Box::new(CliError::InvalidKeyName(key.to_string())))
 }
