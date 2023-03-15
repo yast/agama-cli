@@ -3,7 +3,6 @@ use curl::easy::Easy;
 use jsonschema::JSONSchema;
 use serde_json;
 use std::{
-    error::Error,
     fs, io,
     io::{stdout, Write},
     path::Path,
@@ -108,13 +107,13 @@ impl ProfileEvaluator {
 
         let hwinfo_path = dir.path().join("hw.libsonnet");
         self.write_hwinfo(&hwinfo_path)
-            .map_err(|e| ProfileError::NoHardwareInfo(e))?;
+            .map_err(ProfileError::NoHardwareInfo)?;
 
         let result = Command::new("/usr/bin/jsonnet")
             .arg("profile.jsonnet")
             .current_dir(&dir)
             .output()
-            .map_err(|e| ProfileError::EvaluationError(e))?;
+            .map_err(ProfileError::EvaluationError)?;
         io::stdout().write_all(&result.stdout)?;
         Ok(())
     }
@@ -125,7 +124,7 @@ impl ProfileEvaluator {
     // out of the box.
     fn write_hwinfo(&self, path: &Path) -> Result<(), io::Error> {
         let result = Command::new("/usr/sbin/lshw")
-            .args(&["-json", "-class", "disk"])
+            .args(["-json", "-class", "disk"])
             .output()?;
         let mut file = fs::File::create(path)?;
         file.write(b"{ \"disks\":\n")?;

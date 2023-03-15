@@ -32,7 +32,7 @@ struct Cli {
 async fn probe(manager: &ManagerClient<'_>) -> Result<(), Box<dyn Error>> {
     let another_manager = build_manager().await?;
     let probe = task::spawn(async move { another_manager.probe().await });
-    show_progress(&manager).await?;
+    show_progress(manager).await?;
 
     Ok(probe.await?)
 }
@@ -45,7 +45,7 @@ async fn install(manager: &ManagerClient<'_>) -> Result<(), Box<dyn Error>> {
     }
     let another_manager = build_manager().await?;
     let install = task::spawn(async move { another_manager.install().await });
-    show_progress(&manager).await?;
+    show_progress(manager).await?;
 
     Ok(install.await?)
 }

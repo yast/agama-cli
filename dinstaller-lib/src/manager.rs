@@ -35,6 +35,6 @@ impl<'a> ManagerClient<'a> {
     }
 
     pub async fn progress(&self) -> zbus::Result<Progress> {
-        Ok(Progress::from_proxy(&self.progress_proxy).await?)
+        Progress::from_proxy(&self.progress_proxy).await
     }
 }
