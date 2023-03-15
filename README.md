@@ -24,8 +24,8 @@ project and run it as root:
 
 ```
 $ cargo build
-$ sudo ./target/debug/dinstaller-cli --help
-Usage: dinstaller-cli [OPTIONS] <COMMAND>
+$ sudo ./target/debug/dinstaller --help
+Usage: dinstaller [OPTIONS] <COMMAND>
 ...
 ```
 
@@ -40,8 +40,7 @@ $ sudo ./target/debug/dinstaller-cli --format json config show
 To set one or multiple parameters, just use the `config set` command:
 
 ```
-$ sudo ./target/debug/dinstaller-cli config set software.product=Tumbleweed user.full_name="Jane Doe" \
-    user.userName="jane.doe" user.password="12345" user.autologin=true
+$ sudo ./target/debug/dinstaller-cli config set software.product=Tumbleweed user.full_name="Jane Doe" user.userName="jane.doe" user.password="12345" user.autologin=true
 ```
 
 The following operation can take some time. Please, make sure to read the *Caveats* section for more
@@ -55,7 +54,7 @@ $ sudo ./target/debug/dinstaller-cli config show
 If, at some point you want to force a new probing, you can ask D-Installer to repeat the process again:
 
 ```
-$ sudo ./target/debug/dinstaller-cli probe
+$ sudo ./target/debug/dinstaller probe
 ```
 
 ## Caveats
@@ -68,5 +67,5 @@ $ sudo ./target/debug/dinstaller-cli probe
   and/or 2) do not reload the repositories if the product did not change (in
   the D-Installer side).
 * If no product is selected, the `probe` command will fail.
-* If any of the D-Installer service is busy, `dinstaller-cli` will refuse to
+* If any of the D-Installer service is busy, `dinstaller` will refuse to
   work, even if the service that specific service is not needed at all.
