@@ -1,0 +1,9 @@
+-------------------------------------------------------------------
+Thu Mar 16 11:56:42 UTC 2023 - Imobach Gonzalez Sosa <igonzalezsosa@suse.com>
+
+- First version of the package:
+  * Querying and setting simple values.
+  * Adding elements to collections
+  * Handling of auto-installation profiles.
+  * Basic error handling
+- 0.1
