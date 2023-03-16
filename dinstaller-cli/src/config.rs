@@ -1,6 +1,7 @@
 use crate::error::CliError;
 use crate::printers::{print, Format};
 use clap::Subcommand;
+use convert_case::{Case, Casing};
 use dinstaller_lib::connection;
 use dinstaller_lib::install_settings::{InstallSettings, Scope};
 use dinstaller_lib::settings::{SettingObject, SettingValue, Settings};
@@ -41,7 +42,7 @@ pub async fn run(subcommand: ConfigCommands, format: Option<Format>) -> Result<(
                 .collect();
             let mut model = store.load(Some(scopes)).await?;
             for (key, value) in changes {
-                model.set(&key, SettingValue(value))?;
+                model.set(&key.to_case(Case::Snake), SettingValue(value))?;
             }
             store.store(&model).await
         }
@@ -53,7 +54,7 @@ pub async fn run(subcommand: ConfigCommands, format: Option<Format>) -> Result<(
         ConfigAction::Add(key, values) => {
             let scope = key_to_scope(&key).unwrap();
             let mut model = store.load(Some(vec![scope])).await?;
-            model.add(&key, SettingObject::from(values))?;
+            model.add(&key.to_case(Case::Snake), SettingObject::from(values))?;
             store.store(&model).await
         }
         ConfigAction::Load(path) => {

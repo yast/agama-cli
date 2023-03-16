@@ -72,35 +72,6 @@
           }
         }
       }
-    },
-    "scripts": {
-      "description": "Installation scripts",
-      "type": "array",
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "type": {
-            "description": "Script type ('pre' or 'post')",
-            "type": "string",
-            "enum": [
-              "pre",
-              "post"
-            ]
-          },
-          "source": {
-            "description": "Script sources",
-            "type": "string"
-          },
-          "url": {
-            "description": "URL of the script",
-            "type": "string"
-          }
-        }
-      }
     }
-  },
-  "required": [
-    "software"
-  ]
+  }
 }
