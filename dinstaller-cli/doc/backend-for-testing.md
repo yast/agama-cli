@@ -60,6 +60,9 @@ podman rm ${CNAME?}
 mkdir -p ./mnt/log-yast2 # needed?
 mkdir -p ./mnt/run-dinst # only needed for D-Bus access from outside, unused now
 
+# Update our image
+podman pull ${CIMAGE?}
+
 podman run --name ${CNAME?} \
   --privileged --detach --ipc=host \
   -v .:/checkout -v ./mnt/run-dinst:/run/d-installer -v ./mnt/log-yast2:/var/log/YaST2 \
