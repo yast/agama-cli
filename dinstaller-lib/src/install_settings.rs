@@ -49,6 +49,7 @@ impl FromStr for Scope {
 /// This struct represents installation settings. It serves as an entry point and it is composed of
 /// other structs which hold the settings for each area ("users", "software", etc.).
 #[derive(Debug, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct InstallSettings {
     #[serde(default)]
     pub user: Option<UserSettings>,
@@ -141,6 +142,7 @@ impl Settings for InstallSettings {
 ///
 /// Holds the user settings for the installation.
 #[derive(Debug, Default, Settings, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct UserSettings {
     /// First user's full name
     pub full_name: Option<String>,
@@ -154,6 +156,7 @@ pub struct UserSettings {
 
 /// Storage settings for installation
 #[derive(Debug, Default, Settings, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct StorageSettings {
     /// Whether LVM should be enabled
     pub lvm: Option<bool>,
@@ -166,6 +169,7 @@ pub struct StorageSettings {
 
 /// Device to use in the installation
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Device {
     /// Device name (e.g., "/dev/sda")
     pub name: String,
@@ -186,6 +190,7 @@ impl TryFrom<SettingObject> for Device {
 
 /// Software settings for installation
 #[derive(Debug, Default, Settings, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct SoftwareSettings {
     /// ID of the product to install (e.g., "ALP", "Tumbleweed", etc.)
     pub product: Option<String>,
