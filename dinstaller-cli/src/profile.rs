@@ -1,7 +1,7 @@
 use clap::Subcommand;
 use dinstaller_lib::error::ProfileError;
 use dinstaller_lib::profile::{download, ProfileEvaluator, ProfileValidator, ValidationResult};
-use std::{error::Error, path::Path};
+use std::{path::Path};
 
 #[derive(Subcommand, Debug)]
 pub enum ProfileCommands {

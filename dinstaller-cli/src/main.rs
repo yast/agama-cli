@@ -2,19 +2,21 @@ use clap::Parser;
 
 mod commands;
 mod config;
+mod error;
 mod printers;
 mod profile;
 
+use crate::error::CliError;
 use async_std::task::{self, block_on};
 use commands::Commands;
+use config::run as run_config_cmd;
+use dinstaller_lib::error::ServiceError;
 use dinstaller_lib::manager::ManagerClient;
 use indicatif::ProgressBar;
 use printers::Format;
-use std::time::Duration;
-
-use config::run as run_config_cmd;
-use dinstaller_lib::error::ServiceError;
 use profile::run as run_profile_cmd;
+use std::error::Error;
+use std::time::Duration;
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
@@ -27,91 +29,88 @@ struct Cli {
     pub format: Option<Format>,
 }
 
-async fn probe(manager: &ManagerClient<'_>) {
-    let probe = task::spawn(async {
-        // use new manager here
-        let another_manager = ManagerClient::new(dinstaller_lib::connection().await.unwrap())
-            .await
-            .unwrap();
-        another_manager.probe().await.unwrap()
-    });
-    block_on(show_progress(&manager));
+async fn probe(manager: &ManagerClient<'_>) -> Result<(), Box<dyn Error>> {
+    let another_manager = build_manager().await?;
+    let probe = task::spawn(async move { another_manager.probe().await });
+    show_progress(manager).await?;
 
-    probe.await
+    Ok(probe.await?)
 }
 
-async fn install(manager: &ManagerClient<'_>) {
-    if !manager.can_install().await.unwrap() {
+async fn install(manager: &ManagerClient<'_>) -> Result<(), Box<dyn Error>> {
+    if !manager.can_install().await? {
         // TODO: add some hints what is wrong or add dedicated command for it?
         eprintln!("There are issues with configuration. Cannot install.");
-        return;
+        return Err(Box::new(CliError::ValidationError));
     }
-    let install = task::spawn(async {
-        // use new manager here
-        let another_manager = ManagerClient::new(dinstaller_lib::connection().await.unwrap())
-            .await
-            .unwrap();
-        another_manager.install().await.unwrap()
-    });
-    block_on(show_progress(manager));
+    let another_manager = build_manager().await?;
+    let install = task::spawn(async move { another_manager.install().await });
+    show_progress(manager).await?;
 
-    install.await
+    Ok(install.await?)
 }
 
-async fn show_progress(client: &ManagerClient<'_>) {
+async fn show_progress(client: &ManagerClient<'_>) -> Result<(), ServiceError> {
     // wait 1 second to give other task chance to start, so progress can display something
     task::sleep(Duration::from_secs(1)).await;
-    let mut progress = client.progress().await.unwrap();
+    let mut progress = client.progress().await?;
     eprintln!("Showing progress with max steps {:?}", progress.max_steps);
     let pb = ProgressBar::new(progress.max_steps.into());
     loop {
         if progress.finished {
             pb.finish();
-            return;
+            return Ok(());
         }
         pb.set_position(progress.current_step.into()); // TODO: display also title somewhere
         std::thread::sleep(std::time::Duration::from_secs(1));
-        progress = client.progress().await.unwrap();
+        progress = client.progress().await?;
     }
 }
 
-async fn wait_for_services(manager: &ManagerClient<'_>) {
-    let services = manager.busy_services().await.unwrap();
+async fn wait_for_services(manager: &ManagerClient<'_>) -> Result<(), Box<dyn Error>> {
+    let services = manager.busy_services().await?;
     // TODO: having it optional
     if !services.is_empty() {
         eprintln!("There are busy services {services:?}. Waiting for them.");
-        show_progress(manager).await
+        show_progress(manager).await?
     }
+    Ok(())
 }
 
-async fn build_manager<'a>() -> Result<ManagerClient<'a>, ServiceError> {
+async fn build_manager<'a>() -> Result<ManagerClient<'a>, Box<dyn Error>> {
     let conn = dinstaller_lib::connection().await?;
     Ok(ManagerClient::new(conn).await?)
 }
 
-#[async_std::main]
-async fn main() {
-    let manager = match block_on(build_manager()) {
-        Ok(manager) => manager,
-        Err(error) => {
-            eprintln!("{}", error);
-            return;
-        }
-    };
-
-    // get all attributes to proxy, so later we can rely on signals when dbus service will be blocked
-    block_on(manager.progress()).unwrap().max_steps;
-    block_on(wait_for_services(&manager));
-    let cli = Cli::parse();
+async fn run_command(cli: Cli) -> Result<(), Box<dyn Error>> {
     match cli.command {
-        Commands::Config(subcommand) => block_on(run_config_cmd(subcommand, cli.format)).unwrap(),
-        Commands::Probe => block_on(probe(&manager)),
-        Commands::Profile(subcommand) => {
-            if let Err(error) = run_profile_cmd(subcommand) {
-                eprintln!("{}", error);
-            }
+        Commands::Config(subcommand) => {
+            let manager = build_manager().await?;
+            block_on(wait_for_services(&manager))?;
+            block_on(run_config_cmd(subcommand, cli.format))
         }
-        Commands::Install => block_on(install(&manager)),
+        Commands::Probe => {
+            let manager = build_manager().await?;
+            block_on(wait_for_services(&manager))?;
+            block_on(probe(&manager))
+        }
+        Commands::Profile(subcommand) => Ok(run_profile_cmd(subcommand)?),
+        Commands::Install => {
+            let manager = build_manager().await?;
+            block_on(wait_for_services(&manager))?;
+            block_on(install(&manager))
+        }
         _ => unimplemented!(),
     }
+}
+
+#[async_std::main]
+async fn main() -> Result<(), Box<dyn Error>> {
+    let cli = Cli::parse();
+
+    if let Err(error) = run_command(cli).await {
+        eprintln!("{}", error);
+        return Err(error);
+    }
+    Ok(())
 }
