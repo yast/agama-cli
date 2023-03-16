@@ -58,6 +58,15 @@ If, at some point you want to force a new probing, you can ask D-Installer to re
 $ sudo ./target/debug/dinstaller-cli probe
 ```
 
+## A Testing Backend
+
+The previous section assumes that the D-Installer D-Bus services are running
+on the same machine.
+
+For an alternative setup using a containerized backend, see
+*[How to set up a backend for testing this
+frontend](./dinstaller-cli/doc/backend-for-testing.md)*.
+
 ## Caveats
 
 * After merging

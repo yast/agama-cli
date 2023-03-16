@@ -68,21 +68,25 @@ podman run --name ${CNAME?} \
 # shortcut for the following
 CEXEC="podman exec ${CNAME?} bash -c"
 
-${CEXEC?} "cd /checkout/service && bundle config set --local path 'vendor/bundle' && bundle install"
+${CEXEC?} "cd /checkout && ./setup-service.sh"
 
-${CEXEC?} "cp /checkout/service/share/dbus.conf /usr/share/dbus-1/system.d/org.opensuse.DInstaller.conf"
-
-${CEXEC?} /usr/sbin/NetworkManager
-
+# Optional: explicit service start using a separate log file
 ${CEXEC?} "cd /checkout/service && (bundle exec bin/d-installer > service.log 2>&1 &)"
-
-${CEXEC?} "cat /checkout/service/service.log"
 
 # 4. Copy the frontend
 # assuming the frontend is in a sibling directory
 cp ../d-installer-cli/target/debug/dinstaller-cli .
 ${CEXEC?} "ln -sv /checkout/dinstaller-cli /usr/bin/dinstaller-cli"
 
-# Play!
+# Optional: Play!
 ${CEXEC?} "dinstaller-cli -f yaml config show"
+
+# Optional: show logs of autostarted services
+${CEXEC?} "journalctl --since=-5min"
+
+# Optional: show logs of explicitly started services
+${CEXEC?} "cat /checkout/service/service.log"
+
+# Optional: Interactive shell in the container
+podman exec --tty --interactive ${CNAME?} bash
 ```
