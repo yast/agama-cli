@@ -1,31 +1,21 @@
 {
-   "localization": {
-      "keyboard": "en_US",
-      "language": "en_US"
-   },
-   "scripts": [
+  "localization": {
+    "keyboard": "en_US",
+    "language": "en_US"
+  },
+  "software": {
+    "product": "ALP"
+  },
+  "storage": {
+    "devices": [
       {
-         "type": "post",
-         "url": "https://myscript.org/test.sh"
-      },
-      {
-         "source": "#!/bin/bash\n\necho hello\n",
-         "type": "pre"
+        "name": "/dev/dm-1"
       }
-   ],
-   "software": {
-      "product": "ALP"
-   },
-   "storage": {
-      "devices": [
-         {
-            "name": "/dev/dm-1"
-         }
-      ]
-   },
-   "user": {
-      "fullName": "Jane Doe",
-      "password": "123456",
-      "userName": "jane.doe"
-   }
+    ]
+  },
+  "user": {
+    "fullName": "Jane Doe",
+    "password": "123456",
+    "userName": "jane.doe"
+  }
 }

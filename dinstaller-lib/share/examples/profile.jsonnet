@@ -25,18 +25,4 @@ local findBiggestDisk(disks) =
       },
     ],
   },
-  scripts: [
-    {
-      type: 'post',
-      url: 'https: //myscript.org/test.sh',
-    },
-    {
-      type: 'pre',
-      source: |||
-        #!/bin/bash
-
-        echo hello
-      |||,
-    },
-  ],
 }
