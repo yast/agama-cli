@@ -13,7 +13,7 @@ three packages:
   [D-Installer DBus API](https://github.com/yast/d-installer/blob/master/doc/dbus_api.md) and a
   model for the configuration settings.
 * [dinstaller-cli](./dinstaller-cli): code specific to the command line interface.
-* [dinstaller-cli](./dinstaller-cli): includes a [procedural
+* [dinstaller-derive](./dinstaller-derive): includes a [procedural
   macro](https://doc.rust-lang.org/reference/procedural-macros.html) to reduce the boilerplate code.
 
 ## Status
@@ -38,7 +38,7 @@ cargo install --path .
 
 ## Running
 
-Have into account that you need to run `dinstaller-cli` as root when you want to query or change the
+Take into account that you need to run `dinstaller-cli` as root when you want to query or change the
 D-Installer configuration. Assuming that the D-Installer D-Bus service is running, the next command
 prints the current settings using JSON (hint: you can use `jq` to make result look better):
 
