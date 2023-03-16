@@ -34,14 +34,14 @@ configuration using JSON (you can use YAML if you like it more):
 
 ```
 $ sudo ./target/debug/dinstaller-cli --format json config show
-{"user":{"full_name":"","user_name":"","password":"","autologin":false},"software":{"product":""}}
+{"user":{"fullName":"","userName":"","password":"","autologin":false},"software":{"product":""}}
 ```
 
 To set one or multiple parameters, just use the `config set` command:
 
 ```
 $ sudo ./target/debug/dinstaller-cli config set software.product=Tumbleweed user.full_name="Jane Doe" \
-    user.user_name="jane.doe" user.password="12345" user.autologin=true
+    user.userName="jane.doe" user.password="12345" user.autologin=true
 ```
 
 The following operation can take some time. Please, make sure to read the *Caveats* section for more
@@ -49,7 +49,7 @@ information.
 
 ```
 $ sudo ./target/debug/dinstaller-cli config show
-{"user":{"full_name":"Jane Doe","user_name":"jane.doe","password":"","autologin":true},"software":{"product":"Tumbleweed"}}
+{"user":{"fullName":"Jane Doe","userName":"jane.doe","password":"","autologin":true},"software":{"product":"Tumbleweed"}}
 ```
 
 If, at some point you want to force a new probing, you can ask D-Installer to repeat the process again:
