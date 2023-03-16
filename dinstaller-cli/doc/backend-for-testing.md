@@ -81,7 +81,8 @@ ${CEXEC?} "cat /checkout/service/service.log"
 # 4. Copy the frontend
 # assuming the frontend is in a sibling directory
 cp ../d-installer-cli/target/debug/dinstaller-cli .
+${CEXEC?} "ln -sv /checkout/dinstaller-cli /usr/bin/dinstaller-cli"
 
 # Play!
-${CEXEC?} "/checkout/dinstaller-cli -f yaml config show"
+${CEXEC?} "dinstaller-cli -f yaml config show"
 ```
