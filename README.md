@@ -90,6 +90,15 @@ cargo build
 sudo ./target/debug/dinstaller --help
 ```
 
+## A Testing Backend
+
+The previous section assumes that the D-Installer D-Bus services are running
+on the same machine.
+
+For an alternative setup using a containerized backend, see
+*[How to set up a backend for testing this
+frontend](./dinstaller-cli/doc/backend-for-testing.md)*.
+
 ## Caveats
 
 * If no product is selected, the `probe` command fails.
