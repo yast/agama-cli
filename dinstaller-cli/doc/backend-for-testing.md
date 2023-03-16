@@ -65,20 +65,23 @@ podman run --name ${CNAME?} \
   -v .:/checkout -v ./mnt/run-dinst:/run/d-installer -v ./mnt/log-yast2:/var/log/YaST2 \
   ${CIMAGE?}
 
-podman exec ${CNAME?} bash -c "cd /checkout/service && bundle config set --local path 'vendor/bundle' && bundle install"
+# shortcut for the following
+CEXEC="podman exec ${CNAME?} bash -c"
 
-podman exec ${CNAME?} bash -c "cp /checkout/service/share/dbus.conf /usr/share/dbus-1/system.d/org.opensuse.DInstaller.conf"
+${CEXEC?} "cd /checkout/service && bundle config set --local path 'vendor/bundle' && bundle install"
 
-podman exec ${CNAME?} /usr/sbin/NetworkManager
+${CEXEC?} "cp /checkout/service/share/dbus.conf /usr/share/dbus-1/system.d/org.opensuse.DInstaller.conf"
 
-podman exec ${CNAME?} bash -c "cd /checkout/service && (bundle exec bin/d-installer > service.log 2>&1 &)"
+${CEXEC?} /usr/sbin/NetworkManager
 
-podman exec ${CNAME?} cat /checkout/service/service.log
+${CEXEC?} "cd /checkout/service && (bundle exec bin/d-installer > service.log 2>&1 &)"
+
+${CEXEC?} "cat /checkout/service/service.log"
 
 # 4. Copy the frontend
 # assuming the frontend is in a sibling directory
 cp ../d-installer-cli/target/debug/dinstaller-cli .
 
 # Play!
-podman exec ${CNAME?} /checkout/dinstaller-cli -f yaml config show
+${CEXEC?} "/checkout/dinstaller-cli -f yaml config show"
 ```
