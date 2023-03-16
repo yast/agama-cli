@@ -17,10 +17,68 @@ My first plan had a different finale, 4. Make the D-Bus service visible
 ouside the container, but I hit an issue with D-Bus authentication, hopefully
 solvable.
 
-Josef wanted to test against a different container (...) but that one was a
+Josef wanted to test against a different container ([d-installer-backend][]) but that one was a
 bit old and the D-Bus API was mismatched between frontend and backend.
+
+[d-installer-backend]: https://build.opensuse.org/package/show/YaST:Head:Containers/d-installer-backend
 
 ## Details
 
-WIP. Basically pick the useful bits from the `integration-tests` part of https://github.com/yast/d-installer/blob/25462f57ab695d6910beb59ff0b21a7afaeda47e/.github/workflows/ci.yml
+- Frontend: [d-installer-cli][], this repo
+- Backend:  [d-installer][]
 
+[d-installer-cli]: https://github.com/yast/d-installer-cli
+[d-installer]: https://github.com/yast/d-installer
+
+The container used is built in
+[OBS YaST:Head:Containers/d-installer-testing](d-installer-testing) and
+downloaded from registry.o.o specified below.
+
+[d-installer-testing]: https://build.opensuse.org/package/show/YaST:Head:Containers/d-installer-testing
+
+I basically picked the useful bits from the `integration-tests` part
+of [d-installer/.../ci.yml][ci.yml].
+
+[ci.yml]: https://github.com/yast/d-installer/blob/25462f57ab695d6910beb59ff0b21a7afaeda47e/.github/workflows/ci.yml
+
+
+```sh
+# https://build.opensuse.org/package/show/YaST:Head:Containers/d-installer-testing
+CIMAGE=registry.opensuse.org/yast/head/containers/containers_tumbleweed/opensuse/dinstaller-testing:latest
+# rename this if you test multiple things
+CNAME=dinstaller
+# the '?' here will report a shell error
+# if you accidentally paste a command without setting the variable first
+echo ${CNAME?}
+
+test -f service/d-installer.gemspec || echo "You should run this from a checkout of d-installer"
+
+# destroy the previous instance
+podman stop ${CNAME?}
+podman rm ${CNAME?}
+
+mkdir -p ./mnt/log-yast2 # needed?
+mkdir -p ./mnt/run-dinst # only needed for D-Bus access from outside, unused now
+
+podman run --name ${CNAME?} \
+  --privileged --detach --ipc=host \
+  -v .:/checkout -v ./mnt/run-dinst:/run/d-installer -v ./mnt/log-yast2:/var/log/YaST2 \
+  ${CIMAGE?}
+
+podman exec ${CNAME?} bash -c "cd /checkout/service && bundle config set --local path 'vendor/bundle' && bundle install"
+
+podman exec ${CNAME?} bash -c "cp /checkout/service/share/dbus.conf /usr/share/dbus-1/system.d/org.opensuse.DInstaller.conf"
+
+podman exec ${CNAME?} /usr/sbin/NetworkManager
+
+podman exec ${CNAME?} bash -c "cd /checkout/service && (bundle exec bin/d-installer > service.log 2>&1 &)"
+
+podman exec ${CNAME?} cat /checkout/service/service.log
+
+# 4. Copy the frontend
+# assuming the frontend is in a sibling directory
+cp ../d-installer-cli/target/debug/dinstaller-cli .
+
+# Play!
+podman exec ${CNAME?} /checkout/dinstaller-cli -f yaml config show
+```
