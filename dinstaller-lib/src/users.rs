@@ -72,6 +72,18 @@ impl<'a> UsersClient<'a> {
         FirstUser::from_dbus(self.users_proxy.first_user().await)
     }
 
+    /// SetRootPassword method
+    pub async fn set_root_password(
+        &self,
+        value: &str,
+        encrypted: bool,
+    ) -> Result<u32, ServiceError> {
+        Ok(self
+            .users_proxy
+            .set_root_password(&value, encrypted)
+            .await?)
+    }
+
     /// Whether the root password is set or not
     pub async fn is_root_password(&self) -> Result<bool, ServiceError> {
         Ok(self.users_proxy.root_password_set().await?)
@@ -80,6 +92,11 @@ impl<'a> UsersClient<'a> {
     /// Returns the SSH key for the root user
     pub async fn root_ssh_key(&self) -> zbus::Result<String> {
         self.users_proxy.root_sshkey().await
+    }
+
+    /// SetRootSSHKey method
+    pub async fn set_root_sshkey(&self, value: &str) -> Result<u32, ServiceError> {
+        Ok(self.users_proxy.set_root_sshkey(value).await?)
     }
 
     /// Set the configuration for the first user

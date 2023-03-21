@@ -13,6 +13,10 @@ local findBiggestDisk(disks) =
     userName: 'jane.doe',
     password: '123456',
   },
+  root: {
+    password: 'nots3cr3t',
+    sshKey: '...',
+  },
   // look ma, there are comments!
   localization: {
     language: 'en_US',

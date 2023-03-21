@@ -39,6 +39,20 @@
         "password"
       ]
     },
+    "root": {
+      "description": "Root authentication settings",
+      "type": "object",
+      "properties": {
+        "password": {
+          "description": "Root user password",
+          "type": "string"
+        },
+        "sshPublicKey": {
+          "description": "Root SSH public key",
+          "type": "string"
+        }
+      }
+    },
     "localization": {
       "description": "Localization settings",
       "type": "object",

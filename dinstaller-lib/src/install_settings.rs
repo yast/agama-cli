@@ -111,6 +111,11 @@ impl Settings for InstallSettings {
                     // User settings are flatten. Pass the full attribute name.
                     user.set(&attr, value)?
                 }
+                "root" => {
+                    let root = self.user.get_or_insert(Default::default());
+                    // Root settings are flatten. Pass the full attribute name.
+                    root.set(&attr, value)?
+                }
                 "storage" => {
                     let storage = self.storage.get_or_insert(Default::default());
                     storage.set(id, value)?
@@ -147,6 +152,7 @@ impl Settings for InstallSettings {
 pub struct UserSettings {
     #[serde(rename = "user")]
     pub first_user: Option<FirstUserSettings>,
+    pub root: Option<RootUserSettings>,
 }
 
 impl Settings for UserSettings {
@@ -156,6 +162,10 @@ impl Settings for UserSettings {
                 "user" => {
                     let first_user = self.first_user.get_or_insert(Default::default());
                     first_user.set(id, value)?
+                }
+                "root" => {
+                    let root_user = self.root.get_or_insert(Default::default());
+                    root_user.set(id, value)?
                 }
                 _ => return Err("unknown attribute"),
             }
@@ -185,6 +195,19 @@ pub struct FirstUserSettings {
     pub password: Option<String>,
     /// Whether auto-login should enabled or not
     pub autologin: Option<bool>,
+}
+
+/// Root user settings
+///
+/// Holds the settings for the root user.
+#[derive(Debug, Default, Settings, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RootUserSettings {
+    /// Root's password (in clear text)
+    #[serde(skip_serializing)]
+    pub password: Option<String>,
+    /// Root SSH public key
+    pub ssh_public_key: Option<String>,
 }
 
 /// Storage settings for installation

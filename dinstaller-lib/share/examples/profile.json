@@ -17,5 +17,9 @@
     "fullName": "Jane Doe",
     "password": "123456",
     "userName": "jane.doe"
+  },
+  "root": {
+    "password": "nots3cr3t",
+    "sshKey": "..."
   }
 }
