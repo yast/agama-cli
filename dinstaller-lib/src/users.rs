@@ -2,7 +2,6 @@
 
 use super::proxies::Users1Proxy;
 use crate::error::ServiceError;
-use crate::install_settings::UserSettings;
 use crate::settings::{SettingValue, Settings};
 use serde::Serialize;
 use zbus::Connection;
@@ -40,16 +39,6 @@ impl FirstUser {
             autologin: data.3,
             data: data.4,
         })
-    }
-
-    pub fn from_user_settings(settings: &UserSettings) -> Self {
-        FirstUser {
-            user_name: settings.user_name.clone().unwrap_or_default(),
-            full_name: settings.full_name.clone().unwrap_or_default(),
-            autologin: settings.autologin.unwrap_or_default(),
-            password: settings.password.clone().unwrap_or_default(),
-            ..Default::default()
-        }
     }
 }
 

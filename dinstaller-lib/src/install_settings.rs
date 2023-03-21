@@ -51,7 +51,7 @@ impl FromStr for Scope {
 #[derive(Debug, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct InstallSettings {
-    #[serde(default)]
+    #[serde(default, flatten)]
     pub user: Option<UserSettings>,
     #[serde(default)]
     pub software: Option<SoftwareSettings>,
@@ -108,7 +108,8 @@ impl Settings for InstallSettings {
                 }
                 "user" => {
                     let user = self.user.get_or_insert(Default::default());
-                    user.set(id, value)?
+                    // User settings are flatten. Pass the full attribute name.
+                    user.set(&attr, value)?
                 }
                 "storage" => {
                     let storage = self.storage.get_or_insert(Default::default());
@@ -141,9 +142,41 @@ impl Settings for InstallSettings {
 /// User settings
 ///
 /// Holds the user settings for the installation.
-#[derive(Debug, Default, Settings, Serialize, Deserialize)]
+#[derive(Debug, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct UserSettings {
+    #[serde(rename = "user")]
+    pub first_user: Option<FirstUserSettings>,
+}
+
+impl Settings for UserSettings {
+    fn set(&mut self, attr: &str, value: SettingValue) -> Result<(), &'static str> {
+        if let Some((ns, id)) = attr.split_once('.') {
+            match ns {
+                "user" => {
+                    let first_user = self.first_user.get_or_insert(Default::default());
+                    first_user.set(id, value)?
+                }
+                _ => return Err("unknown attribute"),
+            }
+        }
+        Ok(())
+    }
+
+    fn merge(&mut self, other: &Self) {
+        if let Some(other_first_user) = &other.first_user {
+            let first_user = self.first_user.get_or_insert(Default::default());
+            first_user.merge(other_first_user);
+        }
+    }
+}
+
+/// First user settings
+///
+/// Holds the settings for the first user.
+#[derive(Debug, Default, Settings, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct FirstUserSettings {
     /// First user's full name
     pub full_name: Option<String>,
     /// First user's username
@@ -202,8 +235,8 @@ mod tests {
 
     #[test]
     fn test_merge() {
-        let mut user1 = UserSettings::default();
-        let user2 = UserSettings {
+        let mut user1 = FirstUserSettings::default();
+        let user2 = FirstUserSettings {
             full_name: Some("Jane Doe".to_owned()),
             autologin: Some(true),
             ..Default::default()
