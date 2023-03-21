@@ -25,8 +25,8 @@ struct Cli {
     pub command: Commands,
 
     /// Format output
-    #[arg(value_enum, short, long)]
-    pub format: Option<Format>,
+    #[arg(value_enum, short, long, default_value_t = Format::Json)]
+    pub format: Format,
 }
 
 async fn probe(manager: &ManagerClient<'_>) -> Result<(), Box<dyn Error>> {
