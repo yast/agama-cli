@@ -31,7 +31,7 @@ pub enum ConfigAction {
     Load(String),
 }
 
-pub async fn run(subcommand: ConfigCommands, format: Option<Format>) -> Result<(), Box<dyn Error>> {
+pub async fn run(subcommand: ConfigCommands, format: Format) -> Result<(), Box<dyn Error>> {
     let store = SettingsStore::new(connection().await?).await?;
 
     match parse_config_command(subcommand) {

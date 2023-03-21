@@ -19,14 +19,14 @@ use std::error::Error;
 use std::time::Duration;
 
 #[derive(Parser)]
-#[command(version, about, long_about = None)]
+#[command(name = "dinstaller", version, about, long_about = None)]
 struct Cli {
     #[command(subcommand)]
     pub command: Commands,
 
     /// Format output
-    #[arg(value_enum, short, long)]
-    pub format: Option<Format>,
+    #[arg(value_enum, short, long, default_value_t = Format::Json)]
+    pub format: Format,
 }
 
 async fn probe(manager: &ManagerClient<'_>) -> Result<(), Box<dyn Error>> {

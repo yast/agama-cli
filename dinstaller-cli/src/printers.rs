@@ -16,18 +16,14 @@ use std::io::Write;
 /// print(user, io::stdout(), Some(Format::Json))
 ///   .expect("Something went wrong!")
 /// ```
-pub fn print<T, W>(
-    content: T,
-    writer: W,
-    format: Option<Format>,
-) -> Result<(), Box<dyn error::Error>>
+pub fn print<T, W>(content: T, writer: W, format: Format) -> Result<(), Box<dyn error::Error>>
 where
     T: serde::Serialize + Debug,
     W: Write,
 {
     let printer: Box<dyn Printer<T, W>> = match format {
-        Some(Format::Json) => Box::new(JsonPrinter { content, writer }),
-        Some(Format::Yaml) => Box::new(YamlPrinter { content, writer }),
+        Format::Json => Box::new(JsonPrinter { content, writer }),
+        Format::Yaml => Box::new(YamlPrinter { content, writer }),
         _ => Box::new(TextPrinter { content, writer }),
     };
     printer.print()
