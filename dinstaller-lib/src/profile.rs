@@ -63,7 +63,7 @@ impl ProfileValidator {
         let path = if relative_path.exists() {
             relative_path
         } else {
-            Path::new("/usr/share/dinstaller-rs/profile.schema.json")
+            Path::new("/usr/share/dinstaller-cli/profile.schema.json")
         };
         Self::new(path)
     }
