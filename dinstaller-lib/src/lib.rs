@@ -13,14 +13,9 @@ mod store;
 pub use store::Store;
 
 use crate::error::ServiceError;
-use std::path::Path;
 
 pub async fn connection() -> Result<zbus::Connection, ServiceError> {
-    let path = if Path::new("/run/d-installer/bus").exists() {
-        "/run/d-installer/bus"
-    } else {
-        "/run/dbus/system_bus_socket"
-    };
+    let path = "/run/d-installer/bus";
     let address = format!("unix:path={path}");
     let conn = zbus::ConnectionBuilder::address(address.as_str())?
         .build()
