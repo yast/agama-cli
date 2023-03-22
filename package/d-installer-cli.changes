@@ -1,4 +1,25 @@
 -------------------------------------------------------------------
+Wed Mar 22 09:39:29 UTC 2023 - Imobach Gonzalez Sosa <igonzalezsosa@suse.com>
+
+- Add support for setting root authentication mechanisms
+  (gh#yast/d-installer-cli#47).
+
+-------------------------------------------------------------------
+Tue Mar 21 16:06:02 UTC 2023 - Martin Vidner <mvidner@suse.com>
+
+- Do not fall back to the system D-Bus (gh#yast/d-installer-cli#45).
+
+-------------------------------------------------------------------
+Wed Mar 21 13:28:01 UTC 2023 - Imobach Gonzalez Sosa <igonzalezsosa@suse.com>
+
+- Use JSON as the default format (gh#yast/d-installer-cli#46).
+
+-------------------------------------------------------------------
+Tue Mar 21 08:55:39 UTC 2023 - Josef Reidinger <jreidinger@suse.com>
+
+- Fix the path of the JSON schema (gh#yast/d-installer-cli#44).
+
+-------------------------------------------------------------------
 Thu Mar 16 11:56:42 UTC 2023 - Imobach Gonzalez Sosa <igonzalezsosa@suse.com>
 
 - First version of the package:
