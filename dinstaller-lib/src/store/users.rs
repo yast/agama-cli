@@ -38,11 +38,11 @@ impl<'a> UsersStore<'a> {
     pub async fn store(&self, settings: &UserSettings) -> Result<(), Box<dyn Error>> {
         // fixme: improve
         if let Some(settings) = &settings.first_user {
-            self.store_first_user(&settings).await?;
+            self.store_first_user(settings).await?;
         }
 
         if let Some(settings) = &settings.root {
-            self.store_root_user(&settings).await?;
+            self.store_root_user(settings).await?;
         }
         Ok(())
     }

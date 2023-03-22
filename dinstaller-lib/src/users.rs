@@ -80,7 +80,7 @@ impl<'a> UsersClient<'a> {
     ) -> Result<u32, ServiceError> {
         Ok(self
             .users_proxy
-            .set_root_password(&value, encrypted)
+            .set_root_password(value, encrypted)
             .await?)
     }
 

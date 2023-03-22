@@ -109,12 +109,12 @@ impl Settings for InstallSettings {
                 "user" => {
                     let user = self.user.get_or_insert(Default::default());
                     // User settings are flatten. Pass the full attribute name.
-                    user.set(&attr, value)?
+                    user.set(attr, value)?
                 }
                 "root" => {
                     let root = self.user.get_or_insert(Default::default());
                     // Root settings are flatten. Pass the full attribute name.
-                    root.set(&attr, value)?
+                    root.set(attr, value)?
                 }
                 "storage" => {
                     let storage = self.storage.get_or_insert(Default::default());
