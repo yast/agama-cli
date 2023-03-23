@@ -5,8 +5,12 @@ use thiserror::Error;
 use zbus;
 
 #[derive(Error, Debug)]
-#[error("D-Bus service error: {0}")]
-pub struct ServiceError(#[from] zbus::Error);
+pub enum ServiceError {
+    #[error("D-Bus service error: {0}")]
+    DBus(#[from] zbus::Error),
+    #[error("Input/output error: {0}")]
+    InputOutputError(#[from] io::Error),
+}
 
 #[derive(Error, Debug)]
 pub enum ProfileError {
