@@ -13,9 +13,19 @@ mod store;
 pub use store::Store;
 
 use crate::error::ServiceError;
+use std::path::Path;
+use std::io::{Error, ErrorKind};
+use std::sync::Arc;
+
 
 pub async fn connection() -> Result<zbus::Connection, ServiceError> {
     let path = "/run/d-installer/bus";
+    if !Path::new(path).exists() {
+        let io_err = Error::new(ErrorKind::NotFound, format!("Bus socket {} does not exist", path));
+        let zbus_err = zbus::Error::InputOutput(Arc::new(io_err));
+        return Err(ServiceError::from(zbus_err));
+    }
+
     let address = format!("unix:path={path}");
     let conn = zbus::ConnectionBuilder::address(address.as_str())?
         .build()
