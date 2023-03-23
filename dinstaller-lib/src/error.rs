@@ -8,8 +8,10 @@ use zbus;
 pub enum ServiceError {
     #[error("D-Bus service error: {0}")]
     DBus(#[from] zbus::Error),
-    #[error("Input/output error: {0}")]
-    InputOutputError(#[from] io::Error),
+    // it's fine to say only "Error" because the original
+    // specific error will be printed too
+    #[error("Error: {0}")]
+    Anyhow(#[from] anyhow::Error),
 }
 
 #[derive(Error, Debug)]
