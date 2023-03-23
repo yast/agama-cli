@@ -21,7 +21,7 @@ pub async fn connection() -> Result<zbus::Connection, ServiceError> {
     let path = "/run/d-installer/bus";
     if !Path::new(path).exists() {
         let io_err = Error::new(ErrorKind::NotFound, format!("Bus socket {} does not exist", path));
-        return Err(ServiceError::InputOutputError(io_err));
+        return Err(io_err.into());
     }
 
     let address = format!("unix:path={path}");
