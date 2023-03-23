@@ -21,3 +21,11 @@ pub enum ProfileError {
     #[error("The profile is not a valid JSON file")]
     FormatError(#[from] serde_json::Error),
 }
+
+#[derive(Error, Debug)]
+pub enum WrongParameter {
+    #[error("Unknown product '{0}'. Available products: '{1:?}'")]
+    UnknownProduct(String, Vec<String>),
+    #[error("Wrong user parameters: '{0:?}'")]
+    WrongUser(Vec<String>)
+}
