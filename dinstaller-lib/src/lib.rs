@@ -13,12 +13,14 @@ mod store;
 pub use store::Store;
 
 use crate::error::ServiceError;
+use anyhow::Context;
 
 pub async fn connection() -> Result<zbus::Connection, ServiceError> {
     let path = "/run/d-installer/bus";
     let address = format!("unix:path={path}");
     let conn = zbus::ConnectionBuilder::address(address.as_str())?
         .build()
-        .await?;
+        .await
+        .with_context(|| format!("Connecting to D-Bus address {}", address))?;
     Ok(conn)
 }

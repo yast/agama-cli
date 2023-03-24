@@ -16,3 +16,4 @@ features = { version = "0.10.0", default-features = false }
 serde_json = "1.0.94"
 tempfile = "3.4.0"
 thiserror = "1.0.39"
+anyhow = "1.0"
