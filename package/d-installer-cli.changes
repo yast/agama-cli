@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Fri Mar 24 14:36:36 UTC 2023 - Imobach Gonzalez Sosa <igonzalezsosa@suse.com>
+
+- Version 0.2:
+  * Add validation for software and users settings
+    (gh#yast/d-installer-cli#48, gh#yast/d-installer-cli#51).
+  * Better error reporting when the bus is not found
+    (gh#yast/d-installer-cli#48).
+  * Improve the progress reporting mechanism, although it is still
+    a work in progress (gh#yast/d-installer-cli#50).
+
+-------------------------------------------------------------------
 Wed Mar 22 09:39:29 UTC 2023 - Imobach Gonzalez Sosa <igonzalezsosa@suse.com>
 
 - Add support for setting root authentication mechanisms
