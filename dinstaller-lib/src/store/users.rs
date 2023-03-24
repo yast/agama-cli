@@ -58,7 +58,6 @@ impl<'a> UsersStore<'a> {
         };
         let (result, issues) = self.users_client.set_first_user(&first_user).await?;
         if !result {
-            eprintln!("wrong user found");
             return Err(Box::new(WrongParameter::WrongUser(issues)));  
         }
         Ok(())
