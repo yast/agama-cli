@@ -101,9 +101,9 @@ impl<'a> ProgressMonitor<'a> {
                 let (step, description) = proxy.current_step().await?;
                 let total = proxy.total_steps().await?;
                 if proxy.finished().await? {
-                    println!("{path} finished");
+                    eprintln!("{path} finished");
                 } else {
-                    println!("{path} {step}/{total}: {description}");
+                    eprintln!("{path} {step}/{total}: {description}");
                 }
             }
 
