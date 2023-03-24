@@ -56,8 +56,8 @@ impl<'a> UsersStore<'a> {
             password: settings.password.clone().unwrap_or_default(),
             ..Default::default()
         };
-        let (result, issues) = self.users_client.set_first_user(&first_user).await?;
-        if !result {
+        let (success, issues) = self.users_client.set_first_user(&first_user).await?;
+        if !success {
             return Err(Box::new(WrongParameter::WrongUser(issues)));  
         }
         Ok(())
