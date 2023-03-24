@@ -81,6 +81,11 @@ impl<'a> ProgressMonitorBuilder {
     }
 }
 
+pub trait ProgressPresenter {
+    fn start(&mut self, progress: &[Progress]);
+    fn update(&mut self, progress: &[Progress]);
+}
+
 #[derive(Default)]
 pub struct ProgressMonitor<'a> {
     pub proxies: Vec<Progress1Proxy<'a>>,
@@ -91,22 +96,12 @@ impl<'a> ProgressMonitor<'a> {
         self.proxies.push(proxy);
     }
 
-    pub async fn run(&mut self) -> Result<(), Box<dyn Error>> {
+    pub async fn run(&mut self, mut presenter: impl ProgressPresenter) -> Result<(), Box<dyn Error>> {
         let mut changes = self.build_stream().await;
+        presenter.start(&self.collect_progress().await?);
 
         while let Some(_change) = changes.next().await {
-            // todo: move the presentation logic to a presenter struct
-            for proxy in &self.proxies {
-                let path = proxy.path().to_string();
-                let (step, description) = proxy.current_step().await?;
-                let total = proxy.total_steps().await?;
-                if proxy.finished().await? {
-                    eprintln!("{path} finished");
-                } else {
-                    eprintln!("{path} {step}/{total}: {description}");
-                }
-            }
-
+            presenter.update(&self.collect_progress().await?);
             if self.is_finished().await {
                 return Ok(());
             }
@@ -122,6 +117,16 @@ impl<'a> ProgressMonitor<'a> {
             }
         }
         true
+    }
+
+    async fn collect_progress(&self) -> Result<Vec<Progress>, Box<dyn Error>> {
+            let mut progress = vec![];
+            for proxy in &self.proxies {
+                let proxy_progress = Progress::from_proxy(proxy).await?;
+                progress.push(proxy_progress);
+            }
+            Ok(progress)
+
     }
 
     async fn build_stream(&self) -> SelectAll<PropertyStream<(u32, String)>> {

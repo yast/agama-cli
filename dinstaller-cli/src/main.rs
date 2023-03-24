@@ -5,6 +5,7 @@ mod config;
 mod error;
 mod printers;
 mod profile;
+mod progress;
 
 use crate::error::CliError;
 use async_std::task::{self, block_on};
@@ -13,8 +14,8 @@ use config::run as run_config_cmd;
 use dinstaller_lib::error::ServiceError;
 use dinstaller_lib::manager::ManagerClient;
 use dinstaller_lib::progress::build_progress_monitor;
-use indicatif::ProgressBar;
 use printers::Format;
+use progress::InstallerProgress;
 use profile::run as run_profile_cmd;
 use std::error::Error;
 use std::time::Duration;
@@ -56,7 +57,8 @@ async fn show_progress() -> Result<(), ServiceError> {
     task::sleep(Duration::from_secs(1)).await;
     let conn = dinstaller_lib::connection().await?;
     let mut monitor = build_progress_monitor(conn).await.unwrap();
-    monitor.run().await.expect("failed to monitor the progress");
+    let presenter = InstallerProgress::new();
+    monitor.run(presenter).await.expect("failed to monitor the progress");
     Ok(())
 }
 
