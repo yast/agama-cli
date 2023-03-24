@@ -1,4 +1,4 @@
-use crate::error::ServiceError;
+use crate::error::{ServiceError, WrongParameter};
 use crate::install_settings::SoftwareSettings;
 use crate::software::SoftwareClient;
 use std::error::Error;
@@ -26,7 +26,14 @@ impl<'a> SoftwareStore<'a> {
 
     pub async fn store(&self, settings: &SoftwareSettings) -> Result<(), Box<dyn Error>> {
         if let Some(product) = &settings.product {
-            self.software_client.select_product(product).await?;
+            let products = self.software_client.products().await?;
+            let ids: Vec<String> = products.into_iter().map(|p| p.id).collect();
+            if ids.contains(&product) {
+                self.software_client.select_product(product).await?;
+            } else {
+                return Err(Box::new(WrongParameter::UnknownProduct(product.clone(), ids)));
+            }
+            
         }
         Ok(())
     }
