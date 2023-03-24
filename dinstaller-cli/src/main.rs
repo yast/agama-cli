@@ -12,6 +12,7 @@ use commands::Commands;
 use config::run as run_config_cmd;
 use dinstaller_lib::error::ServiceError;
 use dinstaller_lib::manager::ManagerClient;
+use dinstaller_lib::progress::build_progress_monitor;
 use indicatif::ProgressBar;
 use printers::Format;
 use profile::run as run_profile_cmd;
@@ -29,10 +30,10 @@ struct Cli {
     pub format: Format,
 }
 
-async fn probe(manager: &ManagerClient<'_>) -> Result<(), Box<dyn Error>> {
+async fn probe() -> Result<(), Box<dyn Error>> {
     let another_manager = build_manager().await?;
     let probe = task::spawn(async move { another_manager.probe().await });
-    show_progress(manager).await?;
+    show_progress().await?;
 
     Ok(probe.await?)
 }
@@ -45,26 +46,18 @@ async fn install(manager: &ManagerClient<'_>) -> Result<(), Box<dyn Error>> {
     }
     let another_manager = build_manager().await?;
     let install = task::spawn(async move { another_manager.install().await });
-    show_progress(manager).await?;
+    show_progress().await?;
 
     Ok(install.await?)
 }
 
-async fn show_progress(client: &ManagerClient<'_>) -> Result<(), ServiceError> {
+async fn show_progress() -> Result<(), ServiceError> {
     // wait 1 second to give other task chance to start, so progress can display something
     task::sleep(Duration::from_secs(1)).await;
-    let mut progress = client.progress().await?;
-    eprintln!("Showing progress with max steps {:?}", progress.max_steps);
-    let pb = ProgressBar::new(progress.max_steps.into());
-    loop {
-        if progress.finished {
-            pb.finish();
-            return Ok(());
-        }
-        pb.set_position(progress.current_step.into()); // TODO: display also title somewhere
-        std::thread::sleep(std::time::Duration::from_secs(1));
-        progress = client.progress().await?;
-    }
+    let conn = dinstaller_lib::connection().await?;
+    let mut monitor = build_progress_monitor(conn).await.unwrap();
+    monitor.run().await.expect("failed to monitor the progress");
+    Ok(())
 }
 
 async fn wait_for_services(manager: &ManagerClient<'_>) -> Result<(), Box<dyn Error>> {
@@ -72,7 +65,7 @@ async fn wait_for_services(manager: &ManagerClient<'_>) -> Result<(), Box<dyn Er
     // TODO: having it optional
     if !services.is_empty() {
         eprintln!("There are busy services {services:?}. Waiting for them.");
-        show_progress(manager).await?
+        show_progress().await?
     }
     Ok(())
 }
@@ -92,7 +85,7 @@ async fn run_command(cli: Cli) -> Result<(), Box<dyn Error>> {
         Commands::Probe => {
             let manager = build_manager().await?;
             block_on(wait_for_services(&manager))?;
-            block_on(probe(&manager))
+            block_on(probe())
         }
         Commands::Profile(subcommand) => Ok(run_profile_cmd(subcommand)?),
         Commands::Install => {
