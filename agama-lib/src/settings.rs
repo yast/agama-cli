@@ -26,12 +26,14 @@ use std::convert::TryFrom;
 ///
 /// ```
 /// # use agama_derive::Settings;
-/// # use agama_lib::settings::{Settings, SettingValue};
+/// # use agama_lib::settings::{Settings, SettingValue, SettingObject};
 ///
 /// #[derive(Settings)]
 /// struct UserSettings {
 ///   name: Option<String>,
-///   enabled: Option<bool>
+///   enabled: Option<bool>,
+///   #[collection_setting]
+///   fave_elements: Vec<String>,
 /// }
 ///
 /// struct InstallSettings {
@@ -50,7 +52,11 @@ use std::convert::TryFrom;
 ///   }
 /// }
 ///
-/// let user = UserSettings { name: Some(String::from("foo")), enabled: Some(false) };
+/// let user = UserSettings {
+///                 name: Some(String::from("foo")),
+///                 enabled: Some(false),
+///                 fave_elements: vec![String::from("Br"), String::from("Ba")],
+/// };
 /// let mut settings = InstallSettings { user };
 /// settings.set("user.name", SettingValue("foo.bar".to_string()));
 /// settings.set("user.enabled", SettingValue("true".to_string()));
