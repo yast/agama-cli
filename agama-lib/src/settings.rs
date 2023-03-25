@@ -21,7 +21,7 @@ use std::convert::TryFrom;
 /// Implements support for easily settings attributes values given an ID (`"users.name"`) and a
 /// string value (`"Foo bar"`).
 ///
-/// In the example below, the trait is manually implemented for `Settings and derived for
+/// In the example below, the trait is manually implemented for `InstallSettings` and derived for
 /// `UserSettings`.
 ///
 /// ```
@@ -76,7 +76,7 @@ pub trait Settings {
 
 /// Represents a string-based value and allows converting them to other types
 ///
-/// Supporting more conversions if a matter of implementing the [std::convert::TryFrom] trait for
+/// Supporting more conversions is a matter of implementing the [std::convert::TryFrom] trait for
 /// more types.
 ///
 /// ```
