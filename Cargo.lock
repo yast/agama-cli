@@ -4,7 +4,7 @@ version = 3
 
 [[package]]
 name = "agama-cli"
-version = "0.2.0"
+version = "1.0.0"
 dependencies = [
  "agama-lib",
  "async-std",
@@ -19,7 +19,7 @@ dependencies = [
 
 [[package]]
 name = "agama-derive"
-version = "0.2.0"
+version = "1.0.0"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -28,7 +28,7 @@ dependencies = [
 
 [[package]]
 name = "agama-lib"
-version = "0.2.0"
+version = "1.0.0"
 dependencies = [
  "agama-derive",
  "anyhow",
