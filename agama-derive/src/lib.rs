@@ -4,7 +4,7 @@ use quote::quote;
 use syn::{parse_macro_input, DeriveInput, Fields, Ident};
 
 #[proc_macro_derive(Settings, attributes(collection_setting))]
-pub fn dinstaller_attributes_derive(input: TokenStream) -> TokenStream {
+pub fn agama_attributes_derive(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     let fields = match &input.data {
         syn::Data::Struct(syn::DataStruct {

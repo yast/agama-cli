@@ -8,8 +8,8 @@ use std::io::Write;
 /// # Example
 ///
 ///```rust
-/// use dinstaller_lib::users;
-/// use dinstaller_cli::printers::{print, Format};
+/// use agama_lib::users;
+/// use agama_cli::printers::{print, Format};
 /// use std::io;
 ///
 /// let user = users::User { login: "jane doe".to_string() };

@@ -3,6 +3,48 @@
 version = 3
 
 [[package]]
+name = "agama-cli"
+version = "0.2.0"
+dependencies = [
+ "agama-lib",
+ "async-std",
+ "clap",
+ "convert_case",
+ "indicatif",
+ "serde",
+ "serde_json",
+ "serde_yaml",
+ "thiserror",
+]
+
+[[package]]
+name = "agama-derive"
+version = "0.2.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "agama-lib"
+version = "0.2.0"
+dependencies = [
+ "agama-derive",
+ "anyhow",
+ "async-std",
+ "curl",
+ "futures",
+ "futures-util",
+ "jsonschema",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "thiserror",
+ "zbus",
+]
+
+[[package]]
 name = "ahash"
 version = "0.8.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -436,49 +478,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "dinstaller-cli"
-version = "0.2.0"
-dependencies = [
- "async-std",
- "clap",
- "convert_case",
- "dinstaller-lib",
- "indicatif",
- "serde",
- "serde_json",
- "serde_yaml",
- "thiserror",
-]
-
-[[package]]
-name = "dinstaller-derive"
-version = "0.2.0"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
-]
-
-[[package]]
-name = "dinstaller-lib"
-version = "0.2.0"
-dependencies = [
- "anyhow",
- "async-std",
- "curl",
- "dinstaller-derive",
- "features",
- "futures",
- "futures-util",
- "jsonschema",
- "serde",
- "serde_json",
- "tempfile",
- "thiserror",
- "zbus",
-]
-
-[[package]]
 name = "dirs"
 version = "4.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -569,15 +568,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e51093e27b0797c359783294ca4f0a911c270184cb10f85783b118614a1501be"
 dependencies = [
  "instant",
-]
-
-[[package]]
-name = "features"
-version = "0.10.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "83072b3c84e55f9d0c0ff36a4575d0fd2e543ae4a56e04e7f5a9222188d574e3"
-dependencies = [
- "bitflags",
 ]
 
 [[package]]

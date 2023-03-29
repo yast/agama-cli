@@ -1,6 +1,6 @@
 use clap::Subcommand;
-use dinstaller_lib::error::ProfileError;
-use dinstaller_lib::profile::{download, ProfileEvaluator, ProfileValidator, ValidationResult};
+use agama_lib::error::ProfileError;
+use agama_lib::profile::{download, ProfileEvaluator, ProfileValidator, ValidationResult};
 use std::{path::Path};
 
 #[derive(Subcommand, Debug)]

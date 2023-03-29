@@ -1,22 +1,25 @@
-
+use agama_lib::progress::{Progress, ProgressPresenter};
 use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
-use dinstaller_lib::progress::{ProgressPresenter, Progress};
 
 pub struct InstallerProgress {
     progress: MultiProgress,
-    bars: Vec<ProgressBar>, // proxies: Vec<&'a Progress1Proxy>,
+    bars: Vec<ProgressBar>,
 }
 
 impl InstallerProgress {
     pub fn new() -> Self {
         let progress = MultiProgress::new();
-        Self { progress, bars: vec![] }
+        Self {
+            progress,
+            bars: vec![],
+        }
     }
 }
 
 impl ProgressPresenter for InstallerProgress {
     fn start(&mut self, progress: &[Progress]) {
-        let style = ProgressStyle::with_template("{bar:40.green/white} {pos:>3}/{len:3} {msg}").unwrap();
+        let style =
+            ProgressStyle::with_template("{bar:40.green/white} {pos:>3}/{len:3} {msg}").unwrap();
         for info in progress.iter() {
             let bar = self.progress.add(ProgressBar::new(info.max_steps.into()));
             bar.set_style(style.clone());

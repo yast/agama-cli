@@ -1,20 +1,21 @@
 use crate::error::ServiceError;
-use crate::{progress::Progress, proxies::Progress1Proxy};
-
-use super::proxies::Manager1Proxy;
+use crate::{
+    progress::Progress,
+    proxies::{ManagerProxy, ProgressProxy},
+};
 use zbus::Connection;
 
 /// D-Bus client for the manager service
 pub struct ManagerClient<'a> {
-    manager_proxy: Manager1Proxy<'a>,
-    progress_proxy: Progress1Proxy<'a>,
+    manager_proxy: ManagerProxy<'a>,
+    progress_proxy: ProgressProxy<'a>,
 }
 
 impl<'a> ManagerClient<'a> {
     pub async fn new(connection: Connection) -> zbus::Result<ManagerClient<'a>> {
         Ok(Self {
-            manager_proxy: Manager1Proxy::new(&connection).await?,
-            progress_proxy: Progress1Proxy::new(&connection).await?,
+            manager_proxy: ManagerProxy::new(&connection).await?,
+            progress_proxy: ProgressProxy::new(&connection).await?,
         })
     }
 

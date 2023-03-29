@@ -11,9 +11,9 @@ use crate::error::CliError;
 use async_std::task::{self, block_on};
 use commands::Commands;
 use config::run as run_config_cmd;
-use dinstaller_lib::error::ServiceError;
-use dinstaller_lib::manager::ManagerClient;
-use dinstaller_lib::progress::build_progress_monitor;
+use agama_lib::error::ServiceError;
+use agama_lib::manager::ManagerClient;
+use agama_lib::progress::build_progress_monitor;
 use printers::Format;
 use progress::InstallerProgress;
 use profile::run as run_profile_cmd;
@@ -21,7 +21,7 @@ use std::error::Error;
 use std::time::Duration;
 
 #[derive(Parser)]
-#[command(name = "dinstaller", version, about, long_about = None)]
+#[command(name = "agama", version, about, long_about = None)]
 struct Cli {
     #[command(subcommand)]
     pub command: Commands,
@@ -55,7 +55,7 @@ async fn install(manager: &ManagerClient<'_>) -> Result<(), Box<dyn Error>> {
 async fn show_progress() -> Result<(), ServiceError> {
     // wait 1 second to give other task chance to start, so progress can display something
     task::sleep(Duration::from_secs(1)).await;
-    let conn = dinstaller_lib::connection().await?;
+    let conn = agama_lib::connection().await?;
     let mut monitor = build_progress_monitor(conn).await.unwrap();
     let presenter = InstallerProgress::new();
     monitor.run(presenter).await.expect("failed to monitor the progress");
@@ -73,7 +73,7 @@ async fn wait_for_services(manager: &ManagerClient<'_>) -> Result<(), Box<dyn Er
 }
 
 async fn build_manager<'a>() -> Result<ManagerClient<'a>, Box<dyn Error>> {
-    let conn = dinstaller_lib::connection().await?;
+    let conn = agama_lib::connection().await?;
     Ok(ManagerClient::new(conn).await?)
 }
 
