@@ -36,7 +36,7 @@ pub enum ValidationResult {
 /// Checks whether an autoinstallation profile is valid
 ///
 /// ```
-/// # use dinstaller_lib::profile::{ProfileValidator, ValidationResult};
+/// # use agama_lib::profile::{ProfileValidator, ValidationResult};
 /// # use std::path::Path;
 /// let validator = ProfileValidator::new(
 ///   Path::new("share/profile.schema.json")
@@ -59,11 +59,11 @@ pub struct ProfileValidator {
 
 impl ProfileValidator {
     pub fn default_schema() -> Result<Self, ProfileError> {
-        let relative_path = Path::new("dinstaller-lib/share/profile.schema.json");
+        let relative_path = Path::new("agama-lib/share/profile.schema.json");
         let path = if relative_path.exists() {
             relative_path
         } else {
-            Path::new("/usr/share/d-installer-cli/profile.schema.json")
+            Path::new("/usr/share/agama-cli/profile.schema.json")
         };
         Self::new(path)
     }

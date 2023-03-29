@@ -1,4 +1,4 @@
-use dinstaller_lib::progress::{Progress, ProgressPresenter};
+use agama_lib::progress::{Progress, ProgressPresenter};
 use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
 
 pub struct InstallerProgress {

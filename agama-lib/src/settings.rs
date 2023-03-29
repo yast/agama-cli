@@ -25,8 +25,8 @@ use std::convert::TryFrom;
 /// `UserSettings`.
 ///
 /// ```
-/// # use dinstaller_derive::Settings;
-/// # use dinstaller_lib::settings::{Settings, SettingValue};
+/// # use agama_derive::Settings;
+/// # use agama_lib::settings::{Settings, SettingValue};
 ///
 /// #[derive(Settings)]
 /// struct UserSettings {
@@ -80,7 +80,7 @@ pub trait Settings {
 /// more types.
 ///
 /// ```
-///   # use dinstaller_lib::settings::SettingValue;
+///   # use agama_lib::settings::SettingValue;
 //
 ///   let value = SettingValue("true".to_string());
 ///   let value: bool = value.try_into().expect("the conversion failed");

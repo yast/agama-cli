@@ -2,7 +2,7 @@
 //!
 //! This module implements the mechanisms to load and store the installation settings.
 use crate::settings::{SettingObject, SettingValue, Settings};
-use dinstaller_derive::Settings;
+use agama_derive::Settings;
 use serde::{Deserialize, Serialize};
 use std::convert::TryFrom;
 use std::default::Default;

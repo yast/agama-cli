@@ -1,5 +1,5 @@
 [package]
-name = "dinstaller-lib"
+name = "agama-lib"
 version = "0.2.0"
 edition = "2021"
 
@@ -8,7 +8,7 @@ edition = "2021"
 [dependencies]
 zbus = "3.7.0"
 serde = { version = "1.0.152", features = ["derive"] }
-dinstaller-derive = { path="../dinstaller-derive" }
+agama-derive = { path="../agama-derive" }
 async-std = "1.12.0"
 curl = { version = "0.4.44", features = ["protocol-ftp"] }
 jsonschema = { version = "0.16.1", default-features = false }

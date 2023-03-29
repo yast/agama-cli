@@ -1,6 +1,6 @@
 [workspace]
 members = [
-  "dinstaller-lib",
-  "dinstaller-cli",
-  "dinstaller-derive"
+  "agama-lib",
+  "agama-cli",
+  "agama-derive"
 ]

@@ -3,6 +3,49 @@
 version = 3
 
 [[package]]
+name = "agama-cli"
+version = "0.2.0"
+dependencies = [
+ "agama-lib",
+ "async-std",
+ "clap",
+ "convert_case",
+ "indicatif",
+ "serde",
+ "serde_json",
+ "serde_yaml",
+ "thiserror",
+]
+
+[[package]]
+name = "agama-derive"
+version = "0.2.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "agama-lib"
+version = "0.2.0"
+dependencies = [
+ "agama-derive",
+ "anyhow",
+ "async-std",
+ "curl",
+ "features",
+ "futures",
+ "futures-util",
+ "jsonschema",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "thiserror",
+ "zbus",
+]
+
+[[package]]
 name = "ahash"
 version = "0.8.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -433,49 +476,6 @@ checksum = "8168378f4e5023e7218c89c891c0fd8ecdb5e5e4f18cb78f38cf245dd021e76f"
 dependencies = [
  "block-buffer",
  "crypto-common",
-]
-
-[[package]]
-name = "dinstaller-cli"
-version = "0.2.0"
-dependencies = [
- "async-std",
- "clap",
- "convert_case",
- "dinstaller-lib",
- "indicatif",
- "serde",
- "serde_json",
- "serde_yaml",
- "thiserror",
-]
-
-[[package]]
-name = "dinstaller-derive"
-version = "0.2.0"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
-]
-
-[[package]]
-name = "dinstaller-lib"
-version = "0.2.0"
-dependencies = [
- "anyhow",
- "async-std",
- "curl",
- "dinstaller-derive",
- "features",
- "futures",
- "futures-util",
- "jsonschema",
- "serde",
- "serde_json",
- "tempfile",
- "thiserror",
- "zbus",
 ]
 
 [[package]]
