@@ -51,10 +51,10 @@ cp %{SOURCE2} .cargo/config
 
 %install
 install -D -d -m 0755 %{buildroot}%{_bindir}
-install -m 0755 %{_builddir}/%{name}-%{version}/target/release/agama {buildroot}%{_bindir}/agama
+install -m 0755 %{_builddir}/%{name}-%{version}/target/release/agama %{buildroot}%{_bindir}/agama
 install -D -d -m 0755 %{buildroot}%{_datadir}/agama-cli
 install -m 0644 %{_builddir}/%{name}-%{version}/agama-lib/share/profile.schema.json %{buildroot}%{_datadir}/agama-cli
- 
+
 %check
 %{cargo_test}
 
