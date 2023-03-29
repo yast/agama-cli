@@ -21,7 +21,7 @@ use std::error::Error;
 use std::time::Duration;
 
 #[derive(Parser)]
-#[command(name = "dinstaller", version, about, long_about = None)]
+#[command(name = "agama", version, about, long_about = None)]
 struct Cli {
     #[command(subcommand)]
     pub command: Commands,
