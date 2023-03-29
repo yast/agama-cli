@@ -1,4 +1,4 @@
-use crate::proxies::Progress1Proxy;
+use crate::proxies::ProgressProxy;
 use futures::stream::StreamExt;
 use futures::stream::{select_all, SelectAll};
 use futures_util::future::try_join3;
@@ -15,7 +15,7 @@ pub struct Progress {
 }
 
 impl Progress {
-    pub async fn from_proxy(proxy: &crate::proxies::Progress1Proxy<'_>) -> zbus::Result<Progress> {
+    pub async fn from_proxy(proxy: &crate::proxies::ProgressProxy<'_>) -> zbus::Result<Progress> {
         let ((current_step, current_title), max_steps, finished) =
             try_join3(proxy.current_step(), proxy.total_steps(), proxy.finished()).await?;
 
@@ -33,17 +33,14 @@ pub async fn build_progress_monitor(
     connection: Connection,
 ) -> Result<ProgressMonitor<'static>, Box<dyn Error>> {
     let builder = ProgressMonitorBuilder::new(connection)
+        .add_proxy("org.opensuse.Agama1", "/org/opensuse/Agama1/Manager")
         .add_proxy(
-            "org.opensuse.DInstaller",
-            "/org/opensuse/DInstaller/Manager1",
+            "org.opensuse.Agama.Software1",
+            "/org/opensuse/Agama/Software1",
         )
         .add_proxy(
-            "org.opensuse.DInstaller.Software",
-            "/org/opensuse/DInstaller/Software1",
-        )
-        .add_proxy(
-            "org.opensuse.DInstaller.Storage",
-            "/org/opensuse/DInstaller/Storage1",
+            "org.opensuse.Agama.Storage1",
+            "/org/opensuse/Agama/Storage1",
         );
     builder.build().await
 }
@@ -70,7 +67,7 @@ impl<'a> ProgressMonitorBuilder {
         let mut monitor = ProgressMonitor::default();
 
         for (destination, path) in self.proxies {
-            let proxy = Progress1Proxy::builder(&self.connection)
+            let proxy = ProgressProxy::builder(&self.connection)
                 .path(path)?
                 .destination(destination)?
                 .build()
@@ -88,15 +85,18 @@ pub trait ProgressPresenter {
 
 #[derive(Default)]
 pub struct ProgressMonitor<'a> {
-    pub proxies: Vec<Progress1Proxy<'a>>,
+    pub proxies: Vec<ProgressProxy<'a>>,
 }
 
 impl<'a> ProgressMonitor<'a> {
-    pub fn add_proxy(&mut self, proxy: Progress1Proxy<'a>) {
+    pub fn add_proxy(&mut self, proxy: ProgressProxy<'a>) {
         self.proxies.push(proxy);
     }
 
-    pub async fn run(&mut self, mut presenter: impl ProgressPresenter) -> Result<(), Box<dyn Error>> {
+    pub async fn run(
+        &mut self,
+        mut presenter: impl ProgressPresenter,
+    ) -> Result<(), Box<dyn Error>> {
         let mut changes = self.build_stream().await;
         presenter.start(&self.collect_progress().await?);
 
@@ -120,13 +120,12 @@ impl<'a> ProgressMonitor<'a> {
     }
 
     async fn collect_progress(&self) -> Result<Vec<Progress>, Box<dyn Error>> {
-            let mut progress = vec![];
-            for proxy in &self.proxies {
-                let proxy_progress = Progress::from_proxy(proxy).await?;
-                progress.push(proxy_progress);
-            }
-            Ok(progress)
-
+        let mut progress = vec![];
+        for proxy in &self.proxies {
+            let proxy_progress = Progress::from_proxy(proxy).await?;
+            progress.push(proxy_progress);
+        }
+        Ok(progress)
     }
 
     async fn build_stream(&self) -> SelectAll<PropertyStream<(u32, String)>> {
