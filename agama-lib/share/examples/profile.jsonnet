@@ -6,7 +6,7 @@ local findBiggestDisk(disks) =
 
 {
   software: {
-    product: 'ALP',
+    product: 'ALP-Bedrock',
   },
   user: {
     fullName: 'Jane Doe',
