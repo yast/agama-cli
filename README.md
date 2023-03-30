@@ -1,3 +1,5 @@
+:warning: **The code has been moved to https://github.com/openSUSE/agama and this repository is deprecated.** :warning:
+
 # Agama Command Line Interface
 
 This project aims to build a command-line interface for
